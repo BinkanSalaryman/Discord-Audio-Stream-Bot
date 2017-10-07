@@ -1,0 +1,6 @@
+E:\Dev\Cs\Projects\DASB\bin\ConsoleApp\ConsoleApp.exe.config
+E:\Dev\Cs\Projects\DASB\bin\ConsoleApp\ConsoleApp.exe
+E:\Dev\Cs\Projects\DASB\bin\ConsoleApp\ConsoleApp.pdb
+E:\Dev\Cs\Projects\DASB\src\DASB.ConsoleApp\obj\Debug\ConsoleApp.exe
+E:\Dev\Cs\Projects\DASB\src\DASB.ConsoleApp\obj\Debug\ConsoleApp.pdb
+E:\Dev\Cs\Projects\DASB\src\DASB.ConsoleApp\obj\Debug\DASB.ConsoleApp.csprojResolveAssemblyReference.cache
