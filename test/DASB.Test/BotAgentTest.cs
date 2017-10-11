@@ -12,7 +12,7 @@ namespace DASB.Test {
 
         [TestMethod]
         public void check_hasAgents() {
-            if (!agents.GetEnumerator().MoveNext()) {
+            if (agents.FirstOrDefault() != null) {
                 Assert.Fail("No bot agents found!");
             }
         }
@@ -28,7 +28,7 @@ namespace DASB.Test {
 
         [TestMethod]
         public void check_canHelpAll() {
-            foreach(var agent in agents) {
+            foreach (var agent in agents) {
                 foreach (var method in typeof(Commands).GetMethods()) {
                     CommandAttribute cmd = (CommandAttribute)method.GetCustomAttributes(typeof(CommandAttribute), false).FirstOrDefault();
                     if (cmd != null) {

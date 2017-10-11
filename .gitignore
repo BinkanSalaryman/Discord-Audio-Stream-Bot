@@ -1,6 +1,7 @@
 .git/
 .vs/
 bin/
-packages/
 extra/
+obj/
+packages/
 TestResults/

@@ -39,62 +39,133 @@ namespace DASB {
             return changed;
         }
 
-        public bool Check(TKey key, string value, Predicate<string> defaultContains = null) {
-            if (value.StartsWith(NotChar)) {
-                throw new ArgumentException("Cannot check " + NotChar + " permissions");
-            }
+        public PermissionMode GetMode(TKey key) {
+            return GetMode(key, null);
+        }
 
-            bool dblacklist = false;
-            bool dwhitelist = false;
-            bool daccept = false;
-            bool dreject = false;
-
-            if (defaultContains != null) {
-                dblacklist = defaultContains(AllChar);
-                dwhitelist = defaultContains(NotChar + AllChar);
-                daccept = defaultContains(value);
-                dreject = defaultContains(NotChar + value);
+        public PermissionMode GetMode(TKey key, Func<PermissionMode> parent_Mode) {
+            var pmode = PermissionMode.Default;
+            if (parent_Mode != null) {
+                pmode = parent_Mode();
             }
 
             bool blacklist = Contains(key, AllChar);
             bool whitelist = Contains(key, NotChar + AllChar);
+            if (blacklist || (pmode == PermissionMode.Blacklist && !whitelist)) {
+                return PermissionMode.Blacklist;
+            }
+            if (whitelist || (pmode == PermissionMode.Whitelist && !blacklist)) {
+                return PermissionMode.Whitelist;
+            }
+            return PermissionMode.Default;
+        }
+
+        public void SetMode(TKey key, PermissionMode mode) {
+            switch (mode) {
+                case PermissionMode.Blacklist:
+                    Remove(key, NotChar + AllChar);
+                    Add(key, AllChar);
+                    break;
+                case PermissionMode.Whitelist:
+                    Remove(key, AllChar);
+                    Add(key, NotChar + AllChar);
+                    break;
+                default:
+                    Remove(key, AllChar);
+                    Remove(key, NotChar + AllChar);
+                    break;
+            }
+        }
+
+        public Permission Check(TKey key, string value, HashSet<string> @default = null) {
+            if (@default != null) {
+                var parent = new PermissionDictionary<object>();
+                parent.Add("", @default);
+                return Check(key, value, () => parent.GetMode(""), x => parent.Check("", x));
+            } else {
+                return Check(key, value, null, null);
+            }
+        }
+
+        public Permission Check(TKey key, string value, Func<PermissionMode> parent_Mode, Func<string, Permission> parent_Check) {
+            if (value.StartsWith(NotChar)) {
+                throw new ArgumentException("Cannot check " + NotChar + " permissions");
+            }
+
+            PermissionMode pmode = PermissionMode.Default;
+            Permission pcheck = Permission.Default;
+
+            if (parent_Check != null) {
+                pmode = parent_Mode();
+                pcheck = parent_Check(value);
+            }
+
+            PermissionMode mode = GetMode(key, parent_Mode);
             bool accept = Contains(key, value);
             bool reject = Contains(key, NotChar + value);
 
-            if (blacklist || (dblacklist && !whitelist)) {
-                return accept || !(reject || dreject);
+            switch (mode) {
+                case PermissionMode.Blacklist:
+                    if (accept) {
+                        return Permission.Accept;
+                    }
+                    if (reject || (pmode != PermissionMode.Whitelist && pcheck == Permission.Reject)) {
+                        return Permission.Reject;
+                    }
+                    return Permission.Accept;
+                case PermissionMode.Whitelist:
+                    if (reject) {
+                        return Permission.Reject;
+                    }
+                    if (accept || (pmode != PermissionMode.Blacklist && pcheck == Permission.Accept)) {
+                        return Permission.Accept;
+                    }
+                    return Permission.Reject;
+                default:
+                    if(accept) {
+                        return Permission.Accept;
+                    }
+                    if (reject) {
+                        return Permission.Reject;
+                    }
+                    return pcheck;
             }
-            if (whitelist || (dwhitelist && !blacklist)) {
-                return !reject && (accept || daccept);
+        }
+
+        public void UseDefault(TKey key, string value) {
+            if (value == AllChar) {
+                // all = clear all values
+                Clear();
+            } else {
+                // single = remove value
+                Remove(key, value);
+                Remove(key, NotChar + value);
             }
-            return (accept || daccept) && !(reject || dreject);
         }
 
         public void Grant(TKey key, string value) {
-            if (value.StartsWith(NotChar)) {
-                throw new ArgumentException("Cannot grant " + NotChar + " permissions");
-            }
             if (value == AllChar) {
+                // all = turn to blacklist
                 if (ContainsKey(key)) {
                     this[key].RemoveWhere(f => f.StartsWith(NotChar));
                 }
                 Add(key, AllChar);
             } else {
+                // single = add value
                 Remove(key, NotChar + value);
                 Add(key, value);
             }
         }
 
         public void Revoke(TKey key, string value) {
-            if (value.StartsWith(NotChar)) {
-                throw new ArgumentException("Cannot revoke " + NotChar + " permissions");
-            }
             if (value == AllChar) {
+                // all = turn to whitelist
                 if (ContainsKey(key)) {
                     this[key].RemoveWhere(f => !f.StartsWith(NotChar));
                 }
                 Add(key, NotChar + AllChar);
             } else {
+                // single = add !value
                 Remove(key, value);
                 Add(key, NotChar + value);
             }
@@ -102,16 +173,7 @@ namespace DASB {
 
         public void Assign(TKey key, string value) {
             if (value.StartsWith(ClearChar)) {
-                value = value.Substring(1);
-                if (value.StartsWith(ClearChar)) {
-                    throw new ArgumentException("Cannot clear " + ClearChar + " permissions");
-                }
-                if (value == AllChar) {
-                    Clear();
-                } else {
-                    Remove(key, value);
-                    Remove(key, NotChar + value);
-                }
+                UseDefault(key, value.Substring(1));
             } else {
                 if (value.StartsWith(NotChar)) {
                     Revoke(key, value.Substring(1));
@@ -120,5 +182,17 @@ namespace DASB {
                 }
             }
         }
+    }
+
+    public enum PermissionMode {
+        Default,
+        Blacklist,
+        Whitelist,
+    }
+
+    public enum Permission {
+        Default,
+        Accept,
+        Reject,
     }
 }

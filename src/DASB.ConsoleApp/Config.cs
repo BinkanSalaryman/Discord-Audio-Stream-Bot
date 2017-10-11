@@ -91,17 +91,26 @@ namespace DASB {
         /// <summary>
         /// default command permissions, may be overridden by per-user permissions
         /// </summary>
-        public HashSet<string> commandsDefaultPermissions = new HashSet<string>() { "help", "permissions", "!assign" };
+        public HashSet<string> commandsDefaultPermissions = new HashSet<string>();
         /// <summary>
-        /// command permissions for each user
+        /// command permissions for users
         /// </summary>
         public PermissionDictionary<ulong> commandsUserPermissions = new PermissionDictionary<ulong>();
+        /// <summary>
+        /// command permissions for roles, per guild 
+        /// </summary>
+        public Dictionary<ulong, PermissionDictionary<ulong>> commandsRolePermissions = new Dictionary<ulong, PermissionDictionary<ulong>>();
 
         public Config() {
-
+            const string standardDefaultPermissions = "help commands permissions ping applications invite !assign";
+            foreach(var p in standardDefaultPermissions.Split(' ')) { 
+                commandsDefaultPermissions.Add(p);
+            }
         }
 
-        public Config(string json) {
+        public Config(string json)
+            : this()
+        {
             Load(JToken.Parse(json));
         }
 
@@ -170,7 +179,8 @@ namespace DASB {
             foreach (var defaultPermission in ((string)node["defaultPermissions"]).Split(' ')) {
                 commandsDefaultPermissions.Add(defaultPermission);
             }
-            commandsUserPermissions = Utils.PermissionDictionaryFromJson<ulong>(node["userPermissions"]);
+            commandsUserPermissions = readUserPermissions(node["userPermissions"]);
+            commandsRolePermissions = readRolePermissions(node["rolePermissions"]);
             pop();
             // #text
 
@@ -247,7 +257,8 @@ namespace DASB {
             node["enabled"] = commandsEnabled;
             node["botAgent"] = commandsBotAgent;
             node["defaultPermissions"] = string.Join(" ", commandsDefaultPermissions);
-            node["userPermissions"] = Utils.ToJson(commandsUserPermissions);
+            node["userPermissions"] = writeUserPermissions(commandsUserPermissions);
+            node["rolePermissions"] = writeRolePermissions(commandsRolePermissions);
             pop();
             // #text
 
@@ -255,6 +266,54 @@ namespace DASB {
             // #
 
             return node;
+        }
+
+        private static JToken writePermissions<T>(PermissionDictionary<T> permissions) {
+            var array = new JArray();
+            foreach (var p in permissions) {
+                array.Add(p.Key);
+                array.Add(string.Join(" ", p.Value));
+            }
+            return array;
+        }
+
+        private static PermissionDictionary<T> readPermissions<T>(JToken node) {
+            var result = new PermissionDictionary<T>();
+            var array = (JArray)node;
+            const int bs = 2;
+            for (int i = 0; i < (array.Count / bs); i++) {
+                T key = array[i * bs].Value<T>();
+                HashSet<string> values = new HashSet<string>();
+                foreach (var value in array[i * bs + 1].Value<string>().Split(' ')) {
+                    values.Add(value);
+                }
+                result.Add(key, values);
+            }
+            return result;
+        }
+
+        private static JToken writeUserPermissions(PermissionDictionary<ulong> userPermissions) {
+            return writePermissions(userPermissions);
+        }
+
+        private static PermissionDictionary<ulong> readUserPermissions(JToken node) {
+            return readPermissions<ulong>(node);
+        }
+
+        private static JToken writeRolePermissions(Dictionary<ulong, PermissionDictionary<ulong>> guildPermissions) {
+            var node = new JObject();
+            foreach(var rolePermissions in guildPermissions) {
+                node.Add(rolePermissions.Key.ToString(), writePermissions(rolePermissions.Value));
+            }
+            return node;
+        }
+
+        private static Dictionary<ulong, PermissionDictionary<ulong>> readRolePermissions(JToken node) {
+            var result = new Dictionary<ulong, PermissionDictionary<ulong>>();
+            foreach (var property in ((JObject)node).Properties()) {
+                result.Add(ulong.Parse(property.Name), readPermissions<ulong>(property.Value));
+            }
+            return result;
         }
 
         public override string ToString() {

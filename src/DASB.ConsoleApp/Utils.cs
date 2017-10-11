@@ -10,6 +10,17 @@ using System.Threading.Tasks;
 
 namespace DASB {
     internal static class Utils {
+        public static Emoji emoji_success => new Emoji(char.ConvertFromUtf32(0x2705));
+        public static Emoji emoji_forbidden => new Emoji(char.ConvertFromUtf32(0x26d4));
+        public static Emoji emoji_warning => new Emoji(char.ConvertFromUtf32(0x26a0));
+        public static Emoji emoji_error => new Emoji(char.ConvertFromUtf32(0x0001f916));
+        public static Emoji emoji_exit => new Emoji(char.ConvertFromUtf32(0x0001f44b));
+
+        public static Color color_info => new Color(0xf0ff40);
+
+        public static readonly string link_applications = "https://discordapp.com/developers/applications/me";
+        public static readonly string link_authorize = "https://discordapp.com/oauth2/authorize?client_id={0}&scope=bot&permissions=0";
+
         public static SocketUser ParseUser(DiscordSocketClient discord, string text) {
             ulong userId;
             if (MentionUtils.TryParseUser(text, out userId)) {
@@ -42,12 +53,22 @@ namespace DASB {
             return user != null ? new[] { user } : null;
         }
 
-        public static UserStatus ParseUserStatus(string status) {
-            switch (status) {
+        public static SocketRole ParseRole(SocketGuild guild, string text) {
+            ulong roleId;
+            if(MentionUtils.TryParseRole(text, out roleId)) {
+                return guild.GetRole(roleId);
+            }
+            return null;
+        }
+
+        public static UserStatus? ParseUserStatus(string status) {
+            switch (status.ToLowerInvariant()) {
                 case "online":
                     return UserStatus.Online;
                 case "idle":
                     return UserStatus.Idle;
+                case "afk":
+                    return UserStatus.AFK;
                 case "dnd":
                     return UserStatus.DoNotDisturb;
                 case "invisible":
@@ -55,7 +76,7 @@ namespace DASB {
                 case "offline":
                     return UserStatus.Offline;
                 default:
-                    throw new ArgumentOutOfRangeException("status");
+                    return null;
             }
         }
 
@@ -99,30 +120,6 @@ namespace DASB {
                 default:
                     return ConsoleColor.Magenta;
             }
-        }
-
-        public static JToken ToJson<T>(PermissionDictionary<T> permissions) {
-            var array = new JArray();
-            foreach (var p in permissions) {
-                array.Add(p.Key);
-                array.Add(string.Join(" ", p.Value));
-            }
-            return array;
-        }
-
-        public static PermissionDictionary<T> PermissionDictionaryFromJson<T>(JToken node) {
-            var result = new PermissionDictionary<T>();
-            var array = (JArray)node;
-            const int bs = 2;
-            for (int i = 0; i < (array.Count / bs); i++) {
-                T key = array[i * bs].Value<T>();
-                HashSet<string> values = new HashSet<string>();
-                foreach (var value in array[i * bs + 1].Value<string>().Split(' ')) {
-                    values.Add(value);
-                }
-                result.Add(key, values);
-            }
-            return result;
         }
     }
 }

@@ -9,6 +9,7 @@ namespace DASB {
 
         public string Say(BotString @string) {
             switch (@string) {
+                case BotString.error_exception: return "Ouch, that hurt me ;-; (an unexpected error occurred)";
                 case BotString.error_unknownCommand: return "Hmm I don't understand. Try asking for `help` first.";
                 case BotString.error_badArgCount: return "Hmm I don't understand. Try adding or removing some details.";
                 case BotString.warning_unknownCommand: return "**Unkown command:** *{0}*.";
@@ -17,17 +18,22 @@ namespace DASB {
                 case BotString.warning_noPermissionConnect_specifiedChannel: return "I am missing permissions to connect to that voice channel.";
                 case BotString.warning_noPermissionConnect_authorsChannel: return "I am missing permissions to connect to your voice channel.";
                 case BotString.warning_badVoiceChannelId: return "I can't find a voice channel with this id.";
-                case BotString.warning_badUserId: return "I don't know this person.";
+                case BotString.warning_badUser: return "I don't know this person.";
+                case BotString.warning_badStatus: return "I am not sure what you want my status to be.";
                 case BotString.warning_notInVoice: return "I am not connected to a voice channel.";
                 case BotString.warning_voiceChannelNameAmbigous: return "I see there are multiple voice channels with this name, tell me the channel id instead."; ;
                 case BotString.warning_voiceChannelNameNotFound: return "I couldn't find that voice channel.";
                 case BotString.info_pingSelf: return "Pong! ({0} ms)";
                 case BotString.info_pingSuccess: return "It took {0} ms to get a reply.";
                 case BotString.info_pingFailed: return "I couldn't get a reply, looks dead to me...";
-                case BotString.info_permissionsHeadSelf: return "**Permissions:**";
-                case BotString.info_permissionsHeadOther: return "**Permissions for {0}:**";
-                case BotString.info_mailHead: return "**From {0}:**";
-                default: return "Hmm something's fishy with tha. .  .   .    .     beep, boop.";
+                case BotString.info_permissionsSelf: return "Your permissions:";
+                case BotString.info_permissionsOther: return "Permissions for {0}:";
+                case BotString.info_help: return "Use `commands` to show available commands." + "\n"
+                                                 + "Use `help <command>` to get further help." + "\n";
+                case BotString.info_authorize: return "Add me to your server";
+                case BotString.info_applications: return "Your applications";
+                case BotString.info_newMail: return "Someone whispered you:";
+                default: return null;
             }
         }
 

@@ -19,10 +19,15 @@
 
 ## Binaries
 #### Downloads
->[Latest build](https://drive.google.com/uc?export=download&id=0B6898q95NTM3TWdUQVhLbUhnYm8)
+>[Latest build (07.10.2017)](https://goo.gl/S3JqnG) (dd.mm.yyyy)
 
 #### To compile
 * Install Discord.Net package (**PM> Install-Package Discord.Net -version 1.0.2**)
 * Add Discord.Net library files to output folder (**opus.dll**, **sodiumlib.dll**)
 * Install Newtonsoft.Json package (**PM> Install-Package Newtonsoft.Json -version 10.0.2**)
 * Add [BASS.NET](http://bass.radio42.com/bass_register.html) library files to output folder (no need to register) (**bass.dll**, **bass_fx.dll**, **bassnet.dll**, **Un4seen.Bass.dll**)
+
+## If you enjoy my work
+My username in discord is 敏感サラリーマン#3306
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://goo.gl/x3BXFW)

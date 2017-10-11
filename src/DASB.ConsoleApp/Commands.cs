@@ -12,31 +12,28 @@ using System.Threading.Tasks;
 namespace DASB {
     [Group]
     public class Commands : ModuleBase<AudioStreamBot.CommandContext> {
-        public static Emoji emoji_success => new Emoji(char.ConvertFromUtf32(0x2705));
-        public static Emoji emoji_forbidden => new Emoji(char.ConvertFromUtf32(0x26d4));
-        public static Emoji emoji_warning => new Emoji(char.ConvertFromUtf32(0x26a0));
-        public static Emoji emoji_error => new Emoji(char.ConvertFromUtf32(0x0001f916));
-        public static Emoji emoji_exit => new Emoji(char.ConvertFromUtf32(0x0001f44b));
-        
-        public const string link_applications = "https://discordapp.com/developers/applications/me";
-        public const string link_authorize = "https://discordapp.com/oauth2/authorize?client_id={0}&scope=bot&permissions=0";
-
+        // bot user
         public const string setStreaming = "streaming";
         public const string setPlaying = "playing";
         public const string setStatus = "status";
         public const string setNickname = "nickname";
-        public const string sendMail = "whisper";
-        public const string showApplicationsLink = "applications";
-        public const string showAuthorizeLink = "invite";
-        public const string stop = "stop";
         public const string joinVoice = "spawn";
         public const string leaveVoice = "despawn";
+
+        // bot program
+        public const string stop = "stop";
         public const string help = "help";
         public const string listCommands = "commands";
-        public const string assignPermissions = "assign";
         public const string listPermissions = "permissions";
-        public const string ping = "ping";
+        public const string assignPermissions = "assign";
 
+        // other
+        public const string showAuthorizeLink = "invite";
+        public const string showApplicationsLink = "applications";
+        public const string ping = "ping";
+        public const string sendMail = "whisper";
+
+        #region bot user
         [Command(setStreaming)]
         public async Task SetStreamingAsync([Remainder] string game = "") {
             if (!checkRun()) return;
@@ -55,7 +52,13 @@ namespace DASB {
         public async Task SetStatusAsync([Remainder] string status = null) {
             if (!checkRun()) return;
 
-            await Context.Discord.SetStatusAsync(Utils.ParseUserStatus(status ?? "online"));
+            var status_ = Utils.ParseUserStatus(status ?? "online");
+            if (!status_.HasValue) {
+                Context.Feedback = CommandFeedback.Warning;
+                await ReplyAsync(say(BotString.warning_badStatus));
+                return;
+            }
+            await Context.Discord.SetStatusAsync(status_.Value);
         }
 
         [Command(setNickname)]
@@ -64,50 +67,6 @@ namespace DASB {
             if (!checkGuildContext()) return;
 
             await Context.Guild.GetUser(Context.Discord.CurrentUser.Id).ModifyAsync(x => x.Nickname = nick);
-        }
-
-        [Command(sendMail)]
-        public async Task SendMailAsync(string recipient, [Remainder] string message) {
-            if (!checkRun()) return;
-
-            var users = Utils.ParseUsers(Context.Discord, recipient, Context.Guild);
-            if (users == null) {
-                Context.Feedback = CommandFeedback.Warning;
-                await ReplyAsync(say(BotString.warning_badUserId));
-                return;
-            }
-            foreach (var user in users) {
-                var channel = await user.GetOrCreateDMChannelAsync();
-
-                StringBuilder content = new StringBuilder();
-                content.Append(say(BotString.info_mailHead, user.Mention));
-                content.AppendLine(message);
-                await channel.SendMessageAsync(content.ToString());
-            }
-        }
-
-        [Command(showApplicationsLink)]
-        public async Task ShowApplicationsLinkAsyc() {
-            if (!checkRun()) return;
-
-            await ReplyAsync(string.Format(link_applications, Context.Discord.CurrentUser.Id));
-        }
-
-        [Command(showAuthorizeLink)]
-        public async Task ShowInviteLinkAsync() {
-            if (!checkRun()) return;
-
-            await ReplyAsync(string.Format(link_authorize, Context.Discord.CurrentUser.Id));
-        }
-
-        [Command(stop)]
-        public async Task StopAsync() {
-            if (!checkRun()) return;
-
-            await Context.Message.AddReactionAsync(emoji_exit);
-            await Context.Bot.Stop();
-            Context.Bot.Dispose();
-            Environment.Exit(0);
         }
 
         [Command(joinVoice)]
@@ -210,39 +169,57 @@ namespace DASB {
             }
             await Context.Bot.LeaveVoice(Context.Guild.Id);
         }
+        #endregion
 
-        [Command(help)]
-        public async Task HelpAsync() {
+        #region bot program
+        [Command(stop)]
+        public async Task StopAsync() {
             if (!checkRun()) return;
 
-            StringBuilder reply = new StringBuilder();
-            reply.AppendLine("Use `commands` to show available commands.");
-            reply.AppendLine("Use `help <command>` to get further help.");
-            await ReplyAsync(reply.ToString());
+            await Context.Message.AddReactionAsync(Utils.emoji_exit);
+            await Context.Bot.Stop();
+            Context.Bot.Dispose();
+            Environment.Exit(0);
+        }
+
+        [Command("exit", RunMode = RunMode.Async)]
+        public async Task ExitAsync() {
+            await Context.Discord.StopAsync();
+            Environment.Exit(0);
         }
 
         [Command(help)]
-        public async Task HelpAsync(string command) {
+        public async Task HelpAsync(string command = "") {
             if (!checkRun()) return;
 
-            bool success = false;
-            foreach (var method in typeof(Commands).GetMethods()) {
-                CommandAttribute cmd = (CommandAttribute)method.GetCustomAttributes(typeof(CommandAttribute), false).FirstOrDefault();
-                if (cmd != null && cmd.Text == command) {
-                    success = true;
-                    StringBuilder reply = new StringBuilder();
-                    reply.AppendLine("**Syntax:** `" + cmd.Text + " " + string.Join(" ", method.GetParameters().Select(p => "<" + p.Name + ">")) + "`");
-                    string help = Context.Agent.Help(cmd, method.GetParameters().Length);
-                    if (help != null) {
-                        reply.AppendLine("```" + help + "```");
+            if (command != "") {
+                bool success = false;
+                foreach (var method in typeof(Commands).GetMethods()) {
+                    CommandAttribute cmd = (CommandAttribute)method.GetCustomAttributes(typeof(CommandAttribute), false).FirstOrDefault();
+                    if (cmd != null && cmd.Text == command) {
+                        success = true;
+                        string help = Context.Agent.Help(cmd, method.GetParameters().Length);
+                        await ReplyAsync("", false, new EmbedBuilder()
+                            .WithTitle("Command: " + cmd.Text + " " + string.Join(" ", method.GetParameters().Select(p => "<" + p.Name + ">")))
+                            .WithDescription(help ?? "No help found.")
+                            .WithColor(Utils.color_info)
+                        );
+                        Context.Feedback = CommandFeedback.Handled;
                     }
-                    await ReplyAsync(reply.ToString());
                 }
-            }
-            if (!success) {
-                Context.Feedback = CommandFeedback.Warning;
-                await ReplyAsync(say(BotString.warning_unknownCommand, command));
-                return;
+                if (!success) {
+                    Context.Feedback = CommandFeedback.Warning;
+                    await ReplyAsync(say(BotString.warning_unknownCommand, command));
+                    return;
+                }
+            } else {
+                await ReplyAsync("", false, new EmbedBuilder()
+                    .WithTitle(AudioStreamBot.Title)
+                    .WithUrl(AudioStreamBot.Url)
+                    .WithDescription(say(BotString.info_help))
+                    .WithColor(Utils.color_info)
+                );
+                Context.Feedback = CommandFeedback.Handled;
             }
         }
 
@@ -258,51 +235,152 @@ namespace DASB {
                 }
             }
 
-            StringBuilder reply = new StringBuilder();
-            reply.AppendLine("**Available commands:**");
-            reply.Append(string.Join("・", commands.Select(c => c.Text).OrderBy(c => c).Distinct().Select(c => "`" + c + "`")));
-            reply.AppendLine(".");
-            await ReplyAsync(reply.ToString());
+            await ReplyAsync("", false, new EmbedBuilder()
+               .WithTitle("Available commands")
+               .WithDescription(string.Join("・", commands.Select(c => c.Text).OrderBy(c => c).Distinct().Select(c => "`" + c + "`")))
+               .WithColor(Utils.color_info)
+           );
+            Context.Feedback = CommandFeedback.Handled;
         }
 
         [Command(assignPermissions)]
-        public async Task AssignPermissionsAsync(string user, [Remainder] string commands) {
+        public async Task AssignPermissionsAsync(string user_or_role, [Remainder] string commands) {
             if (!checkRun()) return;
 
-            var user_ = Utils.ParseUser(Context.Discord, user);
+            if (isGuildContext()) {
+                // assign role permissions
+                var role = Utils.ParseRole(Context.Guild, user_or_role);
+                if (role != null) {
+                    PermissionDictionary<ulong> permissions;
+                    if (Context.Config.commandsRolePermissions.ContainsKey(Context.Guild.Id)) {
+                        permissions = Context.Config.commandsRolePermissions[Context.Guild.Id];
+                    } else {
+                        permissions = new PermissionDictionary<ulong>();
+                        Context.Config.commandsRolePermissions.Add(Context.Guild.Id, permissions);
+                    }
+
+                    foreach (var command in commands.Split(' ')) {
+                        permissions.Assign(role.Id, command);
+                    }
+                    Context.SaveConfig();
+                    return;
+                }
+            }
+
+            // assign user permissions
+            var user = Utils.ParseUser(Context.Discord, user_or_role);
             if (user == null) {
                 Context.Feedback = CommandFeedback.Warning;
-                await ReplyAsync(say(BotString.warning_badUserId));
+                await ReplyAsync(say(BotString.warning_badUser));
                 return;
             }
+
             foreach (var command in commands.Split(' ')) {
-                Context.Config.commandsUserPermissions.Assign(user_.Id, command);
+                Context.Config.commandsUserPermissions.Assign(user.Id, command);
             }
             Context.SaveConfig();
         }
 
         [Command(listPermissions)]
-        public async Task ListPermissionsAsync([Remainder] string user = "") {
+        public async Task ListPermissionsAsync(string user_or_role = "") {
             if (!checkRun()) return;
 
-            SocketUser user_;
-            StringBuilder reply = new StringBuilder();
-            if (user == "") {
-                user_ = Context.Message.Author;
-                reply.AppendLine(say(BotString.info_permissionsHeadSelf));
+            bool user__role = true;
+            SocketUser user = null;
+            SocketRole role = null;
+            if (user_or_role == "") {
+                user = Context.Message.Author;
+                role = null;
+                user__role = true;
             } else {
-                user_ = Utils.ParseUser(Context.Discord, user);
-                reply.Append(say(BotString.info_permissionsHeadOther, user_.Mention));
+                if (isGuildContext()) {
+                    role = Utils.ParseRole(Context.Guild, user_or_role);
+                    if (role != null) {
+                        user__role = false;
+                    }
+                }
+                if (user__role == true) {
+                    user = Utils.ParseUser(Context.Discord, user_or_role);
+                }
+            }
+            if (user__role == true && user == null) {
+                Context.Feedback = CommandFeedback.Warning;
+                await ReplyAsync(say(BotString.warning_badUser));
+                return;
             }
 
-            if (Context.Config.commandsUserPermissions.ContainsKey(user_.Id)) {
-                reply.Append(string.Join("・", Context.Config.commandsUserPermissions[user_.Id].OrderBy(g => g).Select(c => c.StartsWith("!") ? "!`" + c.Substring(1) + "`" : "`" + c + "`")));
+            StringBuilder permissionsString = new StringBuilder();
+            var permissions = new HashSet<string>();
+            foreach (var method in GetType().GetMethods()) {
+                CommandAttribute cmd = (CommandAttribute)method.GetCustomAttributes(typeof(CommandAttribute), false).FirstOrDefault();
+                if (cmd != null) {
+                    bool runnable;
+                    if (user__role) {
+                        runnable = canUserRun(user.Id, cmd.Text) == Permission.Accept;
+                    } else {
+                        runnable = canRoleRun(role.Id, cmd.Text) == Permission.Accept;
+                    }
+                    if (runnable) {
+                        permissions.Add(cmd.Text);
+                    }
+                }
             }
-            if (Context.Config.ownerId.HasValue && Context.Config.ownerId == user_.Id) {
-                reply.Append(" (owner)");
+
+            permissionsString.Append(string.Join("・", permissions.OrderBy(c => c).Select(c => "`" + c + "`")));
+            permissionsString.AppendLine(".");
+            await ReplyAsync("", false, new EmbedBuilder()
+                .WithTitle(user_or_role == "" ? say(BotString.info_permissionsSelf) : (say(BotString.info_permissionsOther, user__role ? user.Username : "@" + role.Name)))
+                .WithDescription(permissionsString.ToString())
+                .WithColor(Utils.color_info)
+            );
+            Context.Feedback = CommandFeedback.Handled;
+        }
+        #endregion
+
+        #region other
+        [Command(showApplicationsLink)]
+        public async Task ShowApplicationsLinkAsyc() {
+            if (!checkRun()) return;
+
+            await ReplyAsync("", false, new EmbedBuilder()
+              .WithTitle(say(BotString.info_applications))
+              .WithDescription(string.Format(Utils.link_applications, Context.Discord.CurrentUser.Id))
+              .WithColor(Utils.color_info)
+            );
+            Context.Feedback = CommandFeedback.Handled;
+        }
+
+        [Command(showAuthorizeLink)]
+        public async Task ShowInviteLinkAsync() {
+            if (!checkRun()) return;
+
+            await ReplyAsync("", false, new EmbedBuilder()
+              .WithTitle(say(BotString.info_authorize))
+              .WithDescription(string.Format(Utils.link_authorize, Context.Discord.CurrentUser.Id))
+              .WithColor(Utils.color_info)
+            );
+            Context.Feedback = CommandFeedback.Handled;
+        }
+
+        [Command(sendMail)]
+        public async Task SendMailAsync(string recipient, [Remainder] string message) {
+            if (!checkRun()) return;
+
+            var users = Utils.ParseUsers(Context.Discord, recipient, Context.Guild);
+            if (users == null) {
+                Context.Feedback = CommandFeedback.Warning;
+                await ReplyAsync(say(BotString.warning_badUser));
+                return;
             }
-            reply.AppendLine(".");
-            await ReplyAsync(reply.ToString());
+            foreach (var user in users) {
+                var channel = await user.GetOrCreateDMChannelAsync();
+
+                await channel.SendMessageAsync(say(BotString.info_newMail), false, new EmbedBuilder()
+                  .WithAuthor(Context.Message.Author)
+                  .WithDescription(message)
+                  .WithColor(Utils.color_info)
+                );
+            }
         }
 
         [Command(ping)]
@@ -313,24 +391,19 @@ namespace DASB {
                 await ReplyAsync(say(BotString.info_pingSelf, Context.Discord.Latency));
             } else {
                 try {
-                    Ping ping = new Ping();
-                    var reply = await ping.SendPingAsync(host);
-                    if (reply.Status == IPStatus.Success) {
-                        await ReplyAsync(say(BotString.info_pingSuccess, reply.RoundtripTime));
+                    var ping = new Ping();
+                    var pong = await ping.SendPingAsync(host);
+                    if (pong.Status == IPStatus.Success) {
+                        await ReplyAsync(say(BotString.info_pingSuccess, pong.RoundtripTime));
+                        return;
                     }
                 } catch (PingException) {
-                    await ReplyAsync(say(BotString.info_pingFailed));
                 }
+                Context.Feedback = CommandFeedback.Warning;
+                await ReplyAsync(say(BotString.info_pingFailed));
             }
         }
-
-        private string say(BotString @string) {
-            return Context.Agent.Say(@string);
-        }
-
-        private string say(BotString @string, params object[] args) {
-            return Context.Agent.Say(@string, args);
-        }
+        #endregion
 
         private bool checkRun(int stackOffset = 0) {
             const int stackIndex = 3;
@@ -341,23 +414,65 @@ namespace DASB {
         }
 
         private bool checkRun(string command) {
-            bool result = canRun(Context.Message.Author.Id, command);
+            bool result = canUserRun(Context.Message.Author.Id, command) == Permission.Accept;
             if (!result) {
                 Context.Feedback = CommandFeedback.NoEntry;
             }
             return result;
         }
 
-        private bool canRun(ulong userId, string command) {
-            return (Context.Config.ownerId.HasValue && userId == Context.Config.ownerId) || Context.Config.commandsUserPermissions.Check(userId, command, x => Context.Config.commandsDefaultPermissions.Contains(x));
+        private Permission canUserRun(ulong userId, string command) {
+            if (Context.Config.ownerId.HasValue && userId == Context.Config.ownerId) {
+                return Permission.Accept;
+            }
+            if (isGuildContext()) {
+                Permission rolePermission = canRoleRun(userId, command, true);
+                if (rolePermission != Permission.Default) {
+                    return rolePermission;
+                }
+            }
+            return Context.Config.commandsUserPermissions.Check(userId, command, Context.Config.commandsDefaultPermissions);
+        }
+
+        private Permission canRoleRun(ulong entityId, string command, bool userId__roleId = false) {
+            PermissionDictionary<ulong> rolePermissions;
+            if (Context.Config.commandsRolePermissions.TryGetValue(Context.Guild.Id, out rolePermissions)) {
+                IEnumerable<SocketRole> roles;
+                if (userId__roleId) {
+                    var user = Context.Guild.GetUser(entityId);
+                    roles = user.Roles.OrderByDescending(r => r.Position);
+                } else {
+                    var role_ = Context.Guild.GetRole(entityId);
+                    roles = Context.Guild.Roles.OrderByDescending(r => r.Position).Where(r => r.Position <= role_.Position);
+                }
+                foreach (var role in roles) {
+                    Permission rolePermission = rolePermissions.Check(role.Id, command, Context.Config.commandsDefaultPermissions);
+                    if (rolePermission != Permission.Default) {
+                        return rolePermission;
+                    }
+                }
+            }
+            return Permission.Default;
+        }
+
+        private bool isGuildContext() {
+            return Context.Guild != null;
         }
 
         private bool checkGuildContext() {
-            bool result = Context.Guild != null;
+            bool result = isGuildContext();
             if (!result) {
                 Context.Feedback = CommandFeedback.GuildContextRequired;
             }
             return result;
+        }
+
+        private string say(BotString @string) {
+            return Context.Agent.Say(@string);
+        }
+
+        private string say(BotString @string, params object[] args) {
+            return Context.Agent.Say(@string, args);
         }
     }
 }

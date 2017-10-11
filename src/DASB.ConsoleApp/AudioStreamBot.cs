@@ -45,20 +45,23 @@ namespace DASB {
             }
         }
 
+        public static readonly string Title = "Discord Audio Stream Bot";
+        public static readonly string Url = "https://github.com/BinkanSalaryman/Discord-Audio-Stream-Bot";
+
         private const int frequency = 48000;
         private const int channels = 2;
         private static string configPath => Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName, "config.json");
         public static IServiceProvider Services { get; private set; }
-        private static IServiceCollection services = new ServiceCollection();
+        private static IServiceCollection _services = new ServiceCollection();
 
         public static void AddServices(Action<IServiceCollection> modify) {
-            modify(services);
-            Services = services.BuildServiceProvider();
+            modify(_services);
+            Services = _services.BuildServiceProvider();
         }
 
         static AudioStreamBot() {
-            AddServices(x =>
-                x.AddScoped(typeof(IBotAgent), typeof(BotAgentTomoko))
+            AddServices(x => x
+                .AddScoped(typeof(IBotAgent), typeof(BotAgentTomoko))
             );
         }
 
@@ -85,7 +88,7 @@ namespace DASB {
         private MemoryStream playbackBuffer;
 
         private static void Main() {
-            Console.Title = Assembly.GetExecutingAssembly().GetName().Name;
+            Console.Title = Title;
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
             BassNet.Registration("poo@poo.com", "2X25242411252422");
@@ -124,10 +127,9 @@ namespace DASB {
 
             // install commands
             commands = new CommandService();
-            AddServices(x =>
-                x.AddSingleton(discord)
+            AddServices(x => x
+                .AddSingleton(discord)
                 .AddSingleton(commands)
-                .BuildServiceProvider()
             );
 
             var agents = Services.GetServices<IBotAgent>();
@@ -156,12 +158,12 @@ namespace DASB {
                 return;
             }
 
+            Log(LogSeverity.Verbose, message.Author.Username + "#" + message.Author.Discriminator + ": " + message.Content.Substring(argPos));
+           
             Task.Run(() => runCommand(message, argPos));
         }
 
         private async Task runCommand(SocketUserMessage message, int argPos) {
-            Log(LogSeverity.Verbose, message.Author.Username + "#" + message.Author.Discriminator + ": " + message.Content.Substring(argPos));
-
             // run command
             var context = new CommandContext(this, message, (message.Channel as SocketGuildChannel)?.Guild);
             var result = await commands.ExecuteAsync(context, argPos, Services);
@@ -169,17 +171,17 @@ namespace DASB {
             if (result.IsSuccess) {
                 switch (context.Feedback) {
                     case CommandFeedback.Default:
-                        await context.Message.AddReactionAsync(Commands.emoji_success);
+                        await message.AddReactionAsync(Utils.emoji_success);
                         break;
                     case CommandFeedback.NoEntry:
-                        await message.AddReactionAsync(Commands.emoji_forbidden);
+                        await message.AddReactionAsync(Utils.emoji_forbidden);
                         break;
                     case CommandFeedback.Warning:
-                        await message.AddReactionAsync(Commands.emoji_warning);
+                        await message.AddReactionAsync(Utils.emoji_warning);
                         break;
                     case CommandFeedback.GuildContextRequired:
-                        await message.AddReactionAsync(Commands.emoji_warning);
-                        await message.Channel.SendMessageAsync("Please try this in a guild text channel");
+                        await message.AddReactionAsync(Utils.emoji_warning);
+                        await message.Channel.SendMessageAsync("Please run this command in a guild text channel.");
                         break;
                 }
             } else {
@@ -198,7 +200,7 @@ namespace DASB {
                         await message.Channel.SendMessageAsync(result.ErrorReason);
                         break;
                 }
-                await message.AddReactionAsync(Commands.emoji_error);
+                await message.AddReactionAsync(Utils.emoji_error);
             }
         }
 
@@ -227,7 +229,7 @@ namespace DASB {
         private async Task Discord_Ready() {
             if (discord.Guilds.Count == 0) {
                 Log(LogSeverity.Error, "No guild found! Please invite the bot to a guild first, then restart.");
-                Process.Start(string.Format(Commands.link_authorize, discord.CurrentUser.Id));
+                Process.Start(string.Format(Utils.link_authorize, discord.CurrentUser.Id));
                 await Stop();
                 return;
             }
@@ -399,7 +401,7 @@ namespace DASB {
         }
 
         private unsafe bool recordDevice_audioReceived(int handle, IntPtr buffer, int length, IntPtr user) {
-            Log(LogSeverity.Debug, "speaking to " + voiceSets.Values.Count + " guilds");
+            // Log(LogSeverity.Debug, "speaking to " + voiceSets.Values.Count + " guilds");
             try {
                 foreach (var voiceSet in voiceSets.Values) {
                     lock (voiceSet.speakStream_writeLock) {
