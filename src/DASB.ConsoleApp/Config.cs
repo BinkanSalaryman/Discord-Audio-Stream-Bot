@@ -10,41 +10,11 @@ using System.Reflection;
 
 namespace DASB {
     public class Config {
-        public static Config Init(string path) {
-            Config config;
-            if (File.Exists(path)) {
-                try {
-                    config = new Config(File.ReadAllText(path));
-                } catch (Exception ex) {
-                    Utils.Log(LogSeverity.Error, typeof(Config), "Failed to parse configuration", ex);
-                    return null;
-                }
-            } else {
-                Utils.Log(LogSeverity.Warning, typeof(Config), "Configuration file not found, writing prototype to " + path);
-                config = new Config();
-
-            }
-            File.WriteAllText(path, config.ToString());
-            return config;
-        }
-
+        #region config properties
         /// <summary>
         /// bot's token to identify and log into bot account, required
         /// </summary>
         public string botToken = null;
-        /// <summary>
-        /// bot's owner id (your id!)
-        /// if set, the bot attempts to join its owner's voice channel on startup
-        /// </summary>
-        public ulong? ownerId = null;
-        /// <summary>
-        /// flag wether the bot should speak in voice chat
-        /// </summary>
-        public bool autoSpawnEnabled = false;
-        /// <summary>
-        /// bot's guild id for spawning in voice chat when starting
-        /// </summary>
-        public List<ulong> autoSpawnGuildIds = new List<ulong>();
 
         /// <summary>
         /// flag wether the bot should speak in voice chat
@@ -79,13 +49,9 @@ namespace DASB {
         /// special values: null for default playback device
         /// </summary>
         public string listenPlaybackDevice = null;
-
+        
         /// <summary>
-        /// flag wether the bot should execute and respond to commands
-        /// </summary>
-        public bool commandsEnabled = true;
-        /// <summary>
-        /// bot's language implementation
+        /// bot's language implementation, cannot be null
         /// </summary>
         public string commandsBotAgent = "tomoko";
         /// <summary>
@@ -100,191 +66,160 @@ namespace DASB {
         /// command permissions for roles, per guild 
         /// </summary>
         public Dictionary<ulong, PermissionDictionary<ulong>> commandsRolePermissions = new Dictionary<ulong, PermissionDictionary<ulong>>();
-
+        #endregion
+        
         public Config() {
-            const string standardDefaultPermissions = "help commands permissions ping applications invite !assign";
-            foreach(var p in standardDefaultPermissions.Split(' ')) { 
-                commandsDefaultPermissions.Add(p);
-            }
+
         }
 
-        public Config(string json)
-            : this()
-        {
+        public Config(string json) {
             Load(JToken.Parse(json));
         }
 
+        public override string ToString() {
+            return ToJson().ToString(Formatting.Indented);
+        }
+
+        #region I/O
         public void Load(JToken root) {
-            JToken node = root;
-            Action<string> push;
-            Action pop;
-            {
-                var stack = new Stack<JToken>();
-                stack.Push(root);
-                // push child node:
-                push = x => stack.Push(node = node[x]);
-                // pop node:
-                pop = () => { stack.Pop(); node = stack.Peek(); };
-            }
+            var stack = new JTokenStack(root);
 
             // #general
-            push("general");
-            botToken = (string)node["botToken"];
-            ownerId = (ulong?)node["ownerId"];
-
-            // #autoSpawn
-            push("autoSpawn");
-            autoSpawnEnabled = (bool)node["enabled"];
-            autoSpawnGuildIds = new List<ulong>();
-            foreach (var entry in (JArray)node["guildIds"]) {
-                autoSpawnGuildIds.Add(entry.Value<ulong>());
-            }
-            pop();
-            // #general
-
-            pop();
+            stack.Push("general");
+            botToken = (string)stack.Get("botToken");
+            stack.Pop();
             // #
 
             // #voice
-            push("voice");
+            stack.Push("voice");
 
             // #voice - speak
-            push("speak");
-            speakEnabled = (bool)node["enabled"];
-            speakRecordingDevice = (string)node["recordingDevice"];
-            speakAudioType = (AudioApplication)Enum.Parse(typeof(AudioApplication), (string)node["audioType"]);
-            speakBitRate = (int?)node["bitRate"];
-            speakBufferMillis = (int)node["bufferMillis"];
-            pop();
+            stack.Push("speak");
+            speakEnabled = (bool)stack.Get("enabled");
+            speakRecordingDevice = (string)stack.Get("recordingDevice");
+            speakAudioType = (AudioApplication)Enum.Parse(typeof(AudioApplication), (string)stack.Get("audioType"));
+            speakBitRate = (int?)stack.Get("bitRate");
+            speakBufferMillis = (int)stack.Get("bufferMillis");
+            stack.Pop();
             // #voice
 
             // #voice - listen
-            push("listen");
-            listenEnabled = (bool)node["enabled"];
-            listenPlaybackDevice = (string)node["playbackDevice"];
-            pop();
+            stack.Push("listen");
+            listenEnabled = (bool)stack.Get("enabled");
+            listenPlaybackDevice = (string)stack.Get("playbackDevice");
+            stack.Pop();
             // #voice
 
-            pop();
+            stack.Pop();
             // #
 
             // #text
-            push("text");
+            stack.Push("text");
 
             // #text - commands
-            push("commands");
-            commandsEnabled = (bool)node["enabled"];
-            commandsBotAgent = (string)node["botAgent"];
-            commandsDefaultPermissions = new HashSet<string>();
-            foreach (var defaultPermission in ((string)node["defaultPermissions"]).Split(' ')) {
+            stack.Push("commands");
+            commandsBotAgent = (string)stack.Get("botAgent");
+            if(commandsBotAgent == null) {
+                throw new FormatException("bot agent cannot be null");
+            }
+
+            // #text - commands - permissions
+            stack.Push("permissions");
+            commandsDefaultPermissions.Clear();
+            foreach (var defaultPermission in stack.Get("defaultPermissions").Value<string>().Split(' ')) {
                 commandsDefaultPermissions.Add(defaultPermission);
             }
-            commandsUserPermissions = readUserPermissions(node["userPermissions"]);
-            commandsRolePermissions = readRolePermissions(node["rolePermissions"]);
-            pop();
+            commandsUserPermissions = readUserPermissions((JObject)stack.Get("userPermissions"));
+            commandsRolePermissions = readRolePermissions((JObject)stack.Get("rolePermissions"));
+            stack.Pop();
+            // #text - commands
+
+            stack.Pop();
             // #text
 
-            pop();
+            stack.Pop();
             // #
+
+            stack.Pop();
         }
 
         public JToken ToJson() {
-            JToken node = new JObject();
-            Action<string> push;
-            Action pop;
-            {
-                var stack = new Stack<JToken>();
-                stack.Push(node);
-                // push new child node:
-                push = x => stack.Push(node[x] = (node = new JObject()));
-                // pop node:
-                pop = () => { stack.Pop(); node = stack.Peek(); };
-            }
+            var stack = new JTokenStack(new JObject());
 
             // #general
-            push("general");
-            node["botToken"] = botToken;
-            node["ownerId"] = ownerId;
+            stack.PushNew("general");
+            stack.Set("botToken", botToken);
 
-            // #autoSpawn
-            push("autoSpawn");
-            node["enabled"] = autoSpawnEnabled;
-            {
-                var entries = new JArray();
-                foreach (var autoSpawnGuildId in autoSpawnGuildIds) {
-                    entries.Add(autoSpawnGuildId);
-                }
-                node["guildIds"] = entries;
-            }
-            pop();
-            // #general
-
-            pop();
+            stack.Pop();
             // #
 
             // #voice
-            push("voice");
+            stack.PushNew("voice");
 
             // #voice - speak
-            push("speak");
-            node["enabled"] = speakEnabled;
-            node["recordingDevice"] = speakRecordingDevice;
-            node["audioType"] = Enum.GetName(typeof(AudioApplication), speakAudioType);
-            node["bitRate"] = speakBitRate;
-            node["bufferMillis"] = speakBufferMillis;
-            pop();
+            stack.PushNew("speak");
+            stack.Set("enabled", speakEnabled);
+            stack.Set("recordingDevice", speakRecordingDevice);
+            stack.Set("audioType", Enum.GetName(typeof(AudioApplication), speakAudioType));
+            stack.Set("bitRate", speakBitRate);
+            stack.Set("bufferMillis", speakBufferMillis);
+            stack.Pop();
             // #voice
 
             // #voice - listen
-            push("listen");
-            node["enabled"] = listenEnabled;
+            stack.PushNew("listen");
+            stack.Set("enabled", listenEnabled);
             if (listenEnabled) {
-                Utils.Log(LogSeverity.Warning, typeof(Config), "This feature isn't supported yet.");
-                listenEnabled = false;
+                //Utils.Log(LogSeverity.Warning, typeof(Config), "This feature isn't supported yet.");
+                //listenEnabled = false;
             }
-            node["playbackDevice"] = listenPlaybackDevice;
-            pop();
+            stack.Set("playbackDevice", listenPlaybackDevice);
+            stack.Pop();
             // #voice
 
-            pop();
+            stack.Pop();
             // #
 
             // #text
-            push("text");
+            stack.PushNew("text");
 
             // #text - commands
-            push("commands");
-            node["enabled"] = commandsEnabled;
-            node["botAgent"] = commandsBotAgent;
-            node["defaultPermissions"] = string.Join(" ", commandsDefaultPermissions);
-            node["userPermissions"] = writeUserPermissions(commandsUserPermissions);
-            node["rolePermissions"] = writeRolePermissions(commandsRolePermissions);
-            pop();
+            stack.PushNew("commands");
+            stack.Set("botAgent", commandsBotAgent);
+
+            // #text - commands - permissions
+            stack.PushNew("permissions");
+            stack.Set("defaultPermissions", string.Join(" ", commandsDefaultPermissions));
+            stack.Set("userPermissions", writeUserPermissions(commandsUserPermissions));
+            stack.Set("rolePermissions", writeRolePermissions(commandsRolePermissions));
+            stack.Pop();
+            // #text - commands
+
+            stack.Pop();
             // #text
 
-            pop();
+            stack.Pop();
             // #
 
-            return node;
+            return stack.Pop();
         }
+        #endregion
 
-        private static JToken writePermissions<T>(PermissionDictionary<T> permissions) {
-            var array = new JArray();
+        #region complex (de)serialization
+        private static JToken writePermissions(PermissionDictionary<ulong> permissions) {
+            var entries = new JObject();
             foreach (var p in permissions) {
-                array.Add(p.Key);
-                array.Add(string.Join(" ", p.Value));
+                entries.Add(p.Key.ToString(), string.Join(" ", p.Value));
             }
-            return array;
+            return entries;
         }
 
-        private static PermissionDictionary<T> readPermissions<T>(JToken node) {
-            var result = new PermissionDictionary<T>();
-            var array = (JArray)node;
-            const int bs = 2;
-            for (int i = 0; i < (array.Count / bs); i++) {
-                T key = array[i * bs].Value<T>();
-                HashSet<string> values = new HashSet<string>();
-                foreach (var value in array[i * bs + 1].Value<string>().Split(' ')) {
+        private static PermissionDictionary<ulong> readPermissions(JObject node) {
+            var result = new PermissionDictionary<ulong>();
+            foreach (var entry in node) {
+                ulong key = ulong.Parse(entry.Key);
+                var values = new HashSet<string>();
+                foreach (var value in entry.Value.Value<string>().Split(' ')) {
                     values.Add(value);
                 }
                 result.Add(key, values);
@@ -296,28 +231,25 @@ namespace DASB {
             return writePermissions(userPermissions);
         }
 
-        private static PermissionDictionary<ulong> readUserPermissions(JToken node) {
-            return readPermissions<ulong>(node);
+        private static PermissionDictionary<ulong> readUserPermissions(JObject node) {
+            return readPermissions(node);
         }
 
         private static JToken writeRolePermissions(Dictionary<ulong, PermissionDictionary<ulong>> guildPermissions) {
             var node = new JObject();
-            foreach(var rolePermissions in guildPermissions) {
+            foreach (var rolePermissions in guildPermissions) {
                 node.Add(rolePermissions.Key.ToString(), writePermissions(rolePermissions.Value));
             }
             return node;
         }
 
-        private static Dictionary<ulong, PermissionDictionary<ulong>> readRolePermissions(JToken node) {
+        private static Dictionary<ulong, PermissionDictionary<ulong>> readRolePermissions(JObject node) {
             var result = new Dictionary<ulong, PermissionDictionary<ulong>>();
-            foreach (var property in ((JObject)node).Properties()) {
-                result.Add(ulong.Parse(property.Name), readPermissions<ulong>(property.Value));
+            foreach (var entry in node) {
+                result.Add(ulong.Parse(entry.Key), readPermissions((JObject)entry.Value));
             }
             return result;
         }
-
-        public override string ToString() {
-            return ToJson().ToString(Formatting.Indented);
-        }
+        #endregion
     }
 }

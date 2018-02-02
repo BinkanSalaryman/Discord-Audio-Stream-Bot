@@ -1,9 +1,10 @@
 ﻿using Discord.Audio;
+using System.Collections.Concurrent;
 
 namespace DASB {
     public class VoiceSet {
         public IAudioClient audioClient;
         public AudioOutStream speakStream;
-        public readonly object speakStream_writeLock = new object();
+        public ConcurrentDictionary<ulong, AudioInStream> listenStreams = new ConcurrentDictionary<ulong, AudioInStream>();
     }
 }

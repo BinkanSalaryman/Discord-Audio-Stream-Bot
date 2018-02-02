@@ -7,7 +7,7 @@
     <ProjectGuid>{B94DC2EE-0968-42ED-B7D2-3C58D9A54EC9}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>DASB</RootNamespace>
-    <AssemblyName>ConsoleApp</AssemblyName>
+    <AssemblyName>Discord Audio Stream Bot</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,7 +32,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\ConsoleApp\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -43,7 +43,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\ConsoleApp\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -55,7 +55,7 @@
     <StartupObject>DASB.AudioStreamBot</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>dasb.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\dasb.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Discord.Net.Commands, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -91,6 +91,7 @@
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Interactive.Async, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Interactive.Async.3.1.1\lib\net45\System.Interactive.Async.dll</HintPath>
     </Reference>
@@ -111,20 +112,36 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioStreamBot.cs" />
-    <Compile Include="BotAgentTomoko.cs" />
-    <Compile Include="CommandFeedback.cs" />
-    <Compile Include="Commands.cs" />
+    <Compile Include="BotAgent.cs" />
+    <Compile Include="BotString.cs" />
+    <Compile Include="DisablePermissionCheckAttribute.cs" />
+    <Compile Include="CommandContext.cs" />
+    <Compile Include="CommandsModule.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="IBotAgent.cs" />
+    <Compile Include="CopyDelegate.cs" />
+    <Compile Include="DefaultPermissionAttribute.cs" />
+    <Compile Include="JTokenStack.cs" />
+    <Compile Include="MemoryQueue.cs" />
     <Compile Include="PermissionDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RequireGuildContextAttribute.cs" />
     <Compile Include="VoiceSet.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WinApi.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <None Include="packages.config" />
+    <None Include="Resources\tomoko.json" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -139,7 +156,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="dasb.ico" />
+    <None Include="Resources\dasb.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

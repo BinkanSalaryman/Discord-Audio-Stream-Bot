@@ -3,7 +3,7 @@
 namespace DASB {
     internal static class WinApi {
         [DllImport("kernel32.dll")]
-        public static extern bool SetConsoleCtrlHandler(HandlerRoutine Handler, bool Add);
+        public static extern bool SetConsoleCtrlHandler(HandlerRoutine handler, bool add);
 
         public delegate bool HandlerRoutine(CtrlTypes CtrlType);
 
