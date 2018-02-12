@@ -2,10 +2,10 @@
 >A simple discord audio streaming bot.
 
 #### The way the audio flows
-* Audio source (e.g. your voice, music from file, sound from game)
-* ⇛　Configurable audio recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
-* ⇛　Discord Audio Stream Bot (This Software)
-* ⇛　Discord Voice Chat (Discord)
+* 1. Audio source (e.g. your voice, music from file, sound from game)
+* 2. Audio recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
+* 3. Discord Audio Stream Bot (This Software)
+* 4. Discord Voice Chat (Discord)
 
 ![preview](https://drive.google.com/uc?export=download&id=0B6898q95NTM3aG5JU3E3YjdiSk0)
 
