@@ -16,9 +16,6 @@
 * Type **@YourBotNameHere voice join** in a guild text channel to bring the bot into a voice channel.
 * Now it should be sending audio from your *default* recording device (your microphone). To change that, use Virtual Audio Cable from **Binaries>Tools** section.
 
-#### Troubleshooting
-* If you get the error "NotSupportedException: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework...", right click **Commands.dll**, go to properties>security and check the box to grant access. No worries the DLL is safe, it contains the command implementations for use in discord text chat.
-
 ## Binaries
 #### Downloads
 >[Latest build (02.02.2018)](https://goo.gl/S3JqnG) (dd.mm.yyyy)
@@ -28,6 +25,7 @@
 * **Optional:** Install [Audio Router](https://github.com/audiorouterdev/audio-router) to replug your favourite audio source to play into CABLE Input, if it doesn't support switching audio output.
 
 #### Todo/Known issues
+* If you get the error "NotSupportedException: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework...", right click **Commands.dll**, go to properties>security and check the box to grant access. No worries the DLL is safe, it contains the command implementations for use in discord text chat.
 * Permission sytem is not functional currently, just ignore it for the while
 * Setup flow lacks initial "owner" permission assignments
 * voice-listening feature may not work as expected or at all, it isn't important anyway (or is it?)
