@@ -13,7 +13,7 @@
 * Run **Discord Audio Stream Bot.exe**
 * **Auto:** Follow the instructions on the console window to set up your bot.
 * **Manual:** Close to create a fresh **config.json** file, fill in your bot token, then run again.
-* Type **@YourBotNameHere voice join** in a guild text channel to bring the bot into a voice channel.
+* Type "@YourBotNameHere voice join" in a guild text channel to bring the bot into a voice channel. You can specify a channel by appending its name. You can type "@YourBotNameHere help" to get more details about the commands.
 * Now it should be sending audio from your *default* recording device (your microphone). To change that, use Virtual Audio Cable from **Binaries>Tools** section.
 
 ## Binaries
@@ -21,7 +21,7 @@
 >[Latest build (02.02.2018)](https://goo.gl/S3JqnG) (dd.mm.yyyy)
 
 #### Tools
-* **Recommended:** Install [Virtual Cable](https://www.vb-audio.com/Cable/index.htm), close bot and set "recordingDeviceName" in **config.json** to "CABLE Output (VB-Audio Virtual Cable)". Stream audio in the device **CABLE Input**.
+* **Recommended:** Install [Virtual Cable](https://www.vb-audio.com/Cable/index.htm), close bot and set "recordingDeviceName" in **config.json** to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or you'll hear nothing.
 * **Optional:** Install [Audio Router](https://github.com/audiorouterdev/audio-router) to replug your favourite audio source to play into CABLE Input, if it doesn't support switching audio output.
 
 #### Todo/Known issues
