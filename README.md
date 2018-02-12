@@ -12,7 +12,7 @@
 ## Instructions
 * Run once, and close. (It creates a fresh config.json file)
 * Fill the required values in **config.json**.
-* Run again. It should connect to a voice channel on your server, sending audio from your *default* recording device (your microphone).
+* Run again. It should connect to a voice channel on your server when you type "@*BotNameHere* voice join", sending audio from your *default* recording device (your microphone).
 * **Recommended**: Install [Virtual Cable](https://www.vb-audio.com/Cable/index.htm) and set "recordingDeviceName" in **config.json** to "CABLE Output (VB-Audio Virtual Cable)". Restart to apply changes.
 * Stream audio into the recording device. (**CABLE Input** from your favourite audio source if you use Virtual Cable)
 * **Recommended**: If you installed Virtual Cable but your favourite audio source doesn't support switching target audio device, you can use [Audio Router](https://github.com/audiorouterdev/audio-router) to replug the program to play into CABLE Input.
