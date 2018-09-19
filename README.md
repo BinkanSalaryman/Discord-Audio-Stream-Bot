@@ -26,7 +26,6 @@
 
 #### Todo/Known issues
 * If you get the error "NotSupportedException: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework...", right click **Commands.dll**, go to properties>security and check the box to grant access. No worries the DLL is safe, it contains the command implementations for use in discord text chat.
-* Permission sytem is not functional currently, just ignore it for the while
 * Setup flow lacks recording device setting
 * voice-listening feature may not work as expected or at all, it isn't important anyway (or is it?)
 * After long time the bot may stop sending for unknown reason
