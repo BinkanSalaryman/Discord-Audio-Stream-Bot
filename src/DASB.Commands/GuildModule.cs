@@ -8,7 +8,7 @@ namespace DASB {
     public class GuildModule : CommandsModule {
         [Command("join")]
         [Summary("Shows authorization link for adding this bot to a guild.")]
-        [DefaultPermission(Permission.Accept)]
+        [DisablePermissionCheck]
         public async Task JoinGuild() {
             await ReplyAsync("", false, new EmbedBuilder()
               .WithTitle(Say(BotString.info_authorize))

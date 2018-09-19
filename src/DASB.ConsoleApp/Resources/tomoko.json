@@ -18,6 +18,7 @@
     "warning_guildNameAmbigous": "I see there are multiple guilds with this name, tell me the guild id instead.",
     "warning_guildContextRequired": "Please run this command in a guild text channel, or with `guild <guild> <command>`.",
     "warning_permissionsRequired": "Sorry, you may not run this command.",
+    "warning_unrecognizedPermissionEntries": "That doesn't look quite right, I will ignore these entries: {0}",
     "info_pingSelf": "Pong! ({0} ms)",
     "info_pingSuccess": "It took {0} ms to get a reply.",
     "info_pingFailed": "I couldn't get a reply, looks dead to me...",

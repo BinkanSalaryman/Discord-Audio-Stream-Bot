@@ -12,6 +12,27 @@ using System.Threading.Tasks;
 
 namespace DASB {
     public class CommandsModule : ModuleBase<CommandContext> {
+        public const string ERR_PERMISSIONS_REQUIRED = "ERR:RequirePermissions";
+        public const string ERR_REQUIRE_GUILD_CONTEXT = "ERR:RequireGuildContext";
+
+        /// <summary>
+        /// key must:
+        /// 1. be unique (to identify a command)
+        /// 2. not contain spaces (to separate entries)
+        /// 3. not start with permission symbols - !, *, ~ (to work as permission key)
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public static string GetCommandKey(CommandInfo command) {
+            var path = new Stack<string>();
+            path.Push(command.Name);
+            for (var mod = command.Module; mod != null; mod = mod.Parent) {
+                path.Push(mod.Name);
+            }
+
+            return string.Join(".", path) + "(" + string.Join(",", command.Parameters.Select(p => p.Name)) + ")";
+        }
+
         protected Permission CheckUserPermissions(ulong userId, string commandKey) {
             if (userId == Context.Bot.AppInfo.Owner.Id) {
                 return Permission.Accept;
@@ -75,18 +96,28 @@ namespace DASB {
         }
 
         protected override void BeforeExecute(CommandInfo command) {
+            CheckPermissions(command);
+            CheckGuildContext(command);
+        }
+
+        private void CheckPermissions(CommandInfo command) {
             var dpc = command.Attributes.OfType<DisablePermissionCheckAttribute>().SingleOrDefault();
             bool checkPermissions = dpc == null;
-
-            if (checkPermissions && CheckUserPermissions(Context.Message.Author.Id, Utils.GetCommandKey(command)) != Permission.Accept) {
-                throw new InvalidOperationException(nameof(DisablePermissionCheckAttribute));
+            if(!checkPermissions) {
+                return;
             }
 
-            var rgc = command.Attributes.OfType<RequireGuildContextAttribute>().SingleOrDefault();
-            bool checkGuildContext = rgc != null && rgc.RequiresGuildContext;
+            if (CheckUserPermissions(Context.Message.Author.Id, GetCommandKey(command)) != Permission.Accept) {
+                throw new InvalidOperationException(ERR_PERMISSIONS_REQUIRED);
+            }
+        }
 
-            if (checkGuildContext && Context.Guild == null) {
-                throw new InvalidOperationException(nameof(RequireGuildContextAttribute));
+        private void CheckGuildContext(CommandInfo command) {
+            var rgc = command.Attributes.OfType<RequireGuildContextAttribute>().SingleOrDefault();
+            bool requiresGuildContext = rgc != null && rgc.RequiresGuildContext;
+
+            if (requiresGuildContext && Context.Guild == null) {
+                throw new InvalidOperationException(ERR_REQUIRE_GUILD_CONTEXT);
             }
         }
     }

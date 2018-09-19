@@ -132,7 +132,7 @@ namespace DASB {
             }
         }
 
-        public void UseDefault(TKey key, string value) {
+        public void Clear(TKey key, string value) {
             if (value == AllChar) {
                 // all = clear all values
                 Clear();
@@ -173,7 +173,7 @@ namespace DASB {
 
         public void Assign(TKey key, string value) {
             if (value.StartsWith(ClearChar)) {
-                UseDefault(key, value.Substring(1));
+                Clear(key, value.Substring(1));
             } else {
                 if (value.StartsWith(NotChar)) {
                     Revoke(key, value.Substring(1));

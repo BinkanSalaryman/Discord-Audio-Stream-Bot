@@ -211,23 +211,5 @@ namespace DASB {
                 }
             }
         }
-
-        /// <summary>
-        /// key must:
-        /// 1. be unique (to identify a command)
-        /// 2. not contain spaces (to separate entries)
-        /// 3. not start with permission symbols - !, *, ~ (to work as permission key)
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public static string GetCommandKey(CommandInfo command) {
-            var path = new Stack<string>();
-            path.Push(command.Name);
-            for (var mod = command.Module; mod.IsSubmodule; mod = mod.Parent) {
-                path.Push(mod.Name);
-            }
-
-            return string.Join(".", path) + "(" + string.Join(",", command.Parameters.Select(p => p.Name)) + ")";
-        }
     }
 }

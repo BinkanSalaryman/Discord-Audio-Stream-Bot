@@ -18,6 +18,7 @@
         warning_guildNameAmbigous,
         warning_guildContextRequired,
         warning_permissionsRequired,
+        warning_unrecognizedPermissionEntries,
         info_pingSelf,
         info_pingSuccess,
         info_pingFailed,

@@ -241,10 +241,10 @@ namespace DASB {
                 switch (result.Error) {
                     case CommandError.Exception:
                         switch (result.ErrorReason) {
-                            case nameof(RequireGuildContextAttribute):
+                            case CommandsModule.ERR_REQUIRE_GUILD_CONTEXT:
                                 await message.Channel.SendMessageAsync(Agent.Say(BotString.warning_guildContextRequired));
                                 break;
-                            case nameof(DisablePermissionCheckAttribute):
+                            case CommandsModule.ERR_PERMISSIONS_REQUIRED:
                                 await message.Channel.SendMessageAsync(Agent.Say(BotString.warning_permissionsRequired));
                                 break;
                             default:
@@ -350,10 +350,10 @@ namespace DASB {
                     if (dp != null) {
                         switch (dp.DefaultPermission) {
                             case Permission.Accept:
-                                Config.commandsDefaultPermissions.Add(Utils.GetCommandKey(command));
+                                Config.commandsDefaultPermissions.Add(CommandsModule.GetCommandKey(command));
                                 break;
                             case Permission.Reject:
-                                Config.commandsDefaultPermissions.Add("!" + Utils.GetCommandKey(command));
+                                Config.commandsDefaultPermissions.Add("!" + CommandsModule.GetCommandKey(command));
                                 break;
                         }
                     }
