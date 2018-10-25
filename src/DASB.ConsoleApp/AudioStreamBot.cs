@@ -284,19 +284,18 @@ namespace DASB {
             }
 
             // log in & start
-            do {
-                try {
-                    await Discord.LoginAsync(TokenType.Bot, Config.botToken);
-                    await Discord.StartAsync();
-                } catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Unauthorized) {
-                    Log(LogSeverity.Error, "Bot token is invalid", ex);
-                    queryBotToken();
-                    continue;
-                } catch (Exception ex) {
-                    Log(LogSeverity.Error, "Login failed.", ex);
-                    continue;
-                }
-            } while (false);
+            L_login:
+            try {
+                await Discord.LoginAsync(TokenType.Bot, Config.botToken);
+                await Discord.StartAsync();
+            } catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Unauthorized) {
+                Log(LogSeverity.Error, "Bot token is invalid", ex);
+                queryBotToken();
+                goto L_login;
+            } catch (Exception ex) {
+                Log(LogSeverity.Error, "Login failed.", ex);
+                goto L_login;
+            }
         }
 
         private async Task Discord_Ready() {
@@ -305,6 +304,22 @@ namespace DASB {
 
             if (Discord.Guilds.Count == 0) {
                 showNoGuildFound();
+            }
+
+            if(Config.voiceAutoJoinVoiceChannels != null) {
+                foreach(var entry in Config.voiceAutoJoinVoiceChannels) {
+                    var guild = Discord.GetGuild(entry.Key);
+                    if(guild == null) {
+                        Log(LogSeverity.Error, "Auto-join voice: Failed to resolve guild with id " + entry.Key + ". Please check that this guild exists and that the bot user is authorized (it should appear in the member list).");
+                        continue;
+                    }
+                    var voiceChannel = guild.GetVoiceChannel(entry.Value);
+                    if(voiceChannel == null) {
+                        Log(LogSeverity.Error, "Auto-join voice: Failed to resolve voice channel with id " + entry.Value + ". Please check that this channel exists in the guild \""+guild.Name+"\" and that it is a voice channel.");
+                        continue;
+                    }
+                    await JoinVoice(voiceChannel);
+                }
             }
         }
 

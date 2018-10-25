@@ -16,6 +16,8 @@ namespace DASB {
         /// </summary>
         public string botToken = null;
 
+        public Dictionary<ulong, ulong> voiceAutoJoinVoiceChannels = null;
+
         /// <summary>
         /// flag wether the bot should speak in voice chat
         /// </summary>
@@ -110,6 +112,7 @@ namespace DASB {
             stack.Pop();
             // #voice
 
+            voiceAutoJoinVoiceChannels = readVoiceChannels((JObject)stack.Get("autoJoinVoiceChannels"));
             stack.Pop();
             // #
 
@@ -177,6 +180,7 @@ namespace DASB {
             stack.Pop();
             // #voice
 
+            stack.Set("autoJoinVoiceChannels", writeVoiceChannels(voiceAutoJoinVoiceChannels));
             stack.Pop();
             // #
 
@@ -205,7 +209,7 @@ namespace DASB {
         }
         #endregion
 
-        #region complex (de)serialization
+        #region complex serialization
         private static JToken writePermissions(PermissionDictionary<ulong> permissions) {
             var entries = new JObject();
             foreach (var p in permissions) {
@@ -214,6 +218,28 @@ namespace DASB {
             return entries;
         }
 
+        private static JToken writeUserPermissions(PermissionDictionary<ulong> userPermissions) {
+            return writePermissions(userPermissions);
+        }
+
+        private static JToken writeVoiceChannels(Dictionary<ulong, ulong> voiceChannels) {
+            var node = new JObject();
+            foreach (var voiceChannel in voiceChannels) {
+                node.Add(voiceChannel.Key.ToString(), voiceChannel.Value);
+            }
+            return node;
+        }
+
+        private static JToken writeIds(HashSet<ulong> ids) {
+            var node = new JArray();
+            foreach (var id in ids) {
+                node.Add(id);
+            }
+            return node;
+        }
+        #endregion
+
+        #region complex deserialization
         private static PermissionDictionary<ulong> readPermissions(JObject node) {
             var result = new PermissionDictionary<ulong>();
             foreach (var entry in node) {
@@ -226,11 +252,7 @@ namespace DASB {
             }
             return result;
         }
-
-        private static JToken writeUserPermissions(PermissionDictionary<ulong> userPermissions) {
-            return writePermissions(userPermissions);
-        }
-
+        
         private static PermissionDictionary<ulong> readUserPermissions(JObject node) {
             return readPermissions(node);
         }
@@ -247,6 +269,22 @@ namespace DASB {
             var result = new Dictionary<ulong, PermissionDictionary<ulong>>();
             foreach (var entry in node) {
                 result.Add(ulong.Parse(entry.Key), readPermissions((JObject)entry.Value));
+            }
+            return result;
+        }
+
+        private static Dictionary<ulong, ulong> readVoiceChannels(JObject node) {
+            var result = new Dictionary<ulong, ulong>();
+            foreach (var entry in node) {
+                result.Add(ulong.Parse(entry.Key), ulong.Parse(entry.Value.Value<string>()));
+            }
+            return result;
+        }
+
+        private static HashSet<ulong> readIds(JArray node) {
+            var result = new HashSet<ulong>();
+            foreach(var entry in node) {
+                result.Add(entry.Value<ulong>());
             }
             return result;
         }
