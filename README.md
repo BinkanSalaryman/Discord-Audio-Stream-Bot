@@ -18,7 +18,7 @@
 
 ## Binaries
 #### Downloads
->[Latest build (2018-09-19)](https://goo.gl/S3JqnG) (yyyy-MM-dd)
+>[Latest build (2018-10-25)](https://goo.gl/S3JqnG) (yyyy-MM-dd)
 
 #### Tools
 * **Recommended:** Install [Virtual Cable](https://www.vb-audio.com/Cable/index.htm), close bot and set "recordingDeviceName" in **config.json** to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or you'll hear nothing.
