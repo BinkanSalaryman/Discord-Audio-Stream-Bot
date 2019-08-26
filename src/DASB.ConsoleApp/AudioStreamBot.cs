@@ -3,6 +3,7 @@ using Discord;
 using Discord.Audio;
 using Discord.Commands;
 using Discord.Net;
+using Discord.Net.Providers.WS4Net;
 using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -119,7 +120,9 @@ namespace DASB {
             this.commandsPath = commandsPath;
 
             // create discord client
-            Discord = new DiscordSocketClient();
+            Discord = new DiscordSocketClient(new DiscordSocketConfig {
+                WebSocketProvider = WS4NetProvider.Instance
+            });
             Discord.JoinedGuild += Discord_JoinedGuild;
             Discord.LeftGuild += Discord_LeftGuild;
             Discord.MessageReceived += Discord_MessageReceived;
