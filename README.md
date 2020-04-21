@@ -10,33 +10,22 @@
 ![preview](https://drive.google.com/uc?export=download&id=0B6898q95NTM3aG5JU3E3YjdiSk0)
 
 ## Instructions
-* Run **Discord Audio Stream Bot.exe**
-* **Auto:** Follow the instructions on the console window to set up your bot.
-* **Manual:** Close to create a fresh **config.json** file, fill in your bot token, then run again.
-* Type "@YourBotNameHere voice join" in a guild text channel to bring the bot into a voice channel. You can specify a channel by appending its name. You can type "@YourBotNameHere help" to get more details about the commands.
-* Now it should be sending audio from your *default* recording device (your microphone). To change that, use Virtual Audio Cable from **Binaries>Tools** section.
+* Run the .jar file using **run win64.bat** (assuming you are using Windows 64-bit)
+* In the settings tab, insert your bot token (assuming you have already created an application with a bot user [here](https://discordapp.com/developers/applications))
+* In the home tab, click the big on/off button to log in to the bot user
+* In the management tab, invite/add the bot to a guild/server
+* Now you can enter commands by either sending a direct message to the bot user, or @mention from within a channel of one of your guilds/servers. To get started, you can enter the command "help" for a list of available commands, and "help <some command name here>" for specific information about a command. Hint: With the command "prefix" you can give it a short prefix to issue commands instead of the possibly lengthy @mention construct, and with the command "bind" you can restrict issuing of commands to one or more channels.
+* Issue the command "join" to bring the bot user up in a voice channel
+* In the settings tab, enable "speaking" and select a recording device (default one being your microphone, most likely)
+* Now it should be sending audio from the selected recording device to discord.
 
 ## Binaries
 #### Downloads
->[Latest build (2018-10-25)](https://goo.gl/S3JqnG) (yyyy-MM-dd)
+>[Latest build (2020-04-21)](https://drive.google.com/uc?export=download&id=0B6898q95NTM3eGxoSVljMlM3ekk) (yyyy-MM-dd)
 
 #### Tools
-* **Recommended:** Install [Virtual Cable](https://www.vb-audio.com/Cable/index.htm), close bot and set "recordingDeviceName" in **config.json** to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or you'll hear nothing.
+* **Recommended:** Install [Virtual Cable](https://www.vb-audio.com/Cable/index.htm), restart bot program and set the recording device in settings tab to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or else you'll hear nothing.
 * **Optional:** Install [Audio Router](https://github.com/audiorouterdev/audio-router) to replug your favourite audio source to play into CABLE Input, if it doesn't support switching audio output.
-
-#### Todo/Known issues
-* If you get the error "NotSupportedException: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework...", right click **Commands.dll**, go to properties>security and check the box to grant access. No worries the DLL is safe, it contains the command implementations for use in discord text chat.
-* Setup flow lacks recording device setting
-* voice-listening feature may not work as expected or at all, it isn't important anyway (or is it?)
-* After long time the bot may stop sending for unknown reason
-* Losing internet connection for a while may require you to restart the bot
-* Switching audio devices while in use is unhandled
-
-#### To compile
-* Install Discord.Net package (**PM> Install-Package Discord.Net**)
-* Add Discord.Net library files to output folder (**opus.dll**, **sodiumlib.dll**)
-* Install Newtonsoft.Json package (**PM> Install-Package Newtonsoft.Json**)
-* Add [BASS.NET](http://bass.radio42.com/bass_register.html) library files to output folder (no need to register) (**bass.dll**, **bass_fx.dll**, **bassnet.dll**, **Un4seen.Bass.dll**)
 
 ## If you enjoy my work
 Have a chat with me if you feel like it, my username in discord is **敏感サラリーマン#3306**.
