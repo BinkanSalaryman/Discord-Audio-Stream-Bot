@@ -84,7 +84,7 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
     private static boolean RECORDPROC(HRECORD handle, ByteBuffer buffer, int length, Pointer user) {
         List<SpeakHandler> handlers = getActiveHandlers(handle);
 
-        // FIXME distorted after re-joining voice channel or some shit
+        // FIXME distorted after re-joining voice channel or some ****
 
         byte[] sampleBuffer = new byte[2];
         int numSamplesToWrite = length / sampleBuffer.length;
