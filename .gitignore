@@ -1,7 +1,8 @@
-.git/
-.vs/
-bin/
-extra/
-obj/
-packages/
-TestResults/
+.gradle/
+.idea/
+build/
+gradle/
+config.json
+gradlew
+gradlew.bat
+settings.gradle
