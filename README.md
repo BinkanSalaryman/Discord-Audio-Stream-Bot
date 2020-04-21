@@ -13,8 +13,8 @@
 * Run the bot program using **run win64.bat** (assuming you are using Windows 64-bit)
 * In the settings tab, insert your bot token (assuming you have already created an application with a bot user [here](https://discordapp.com/developers/applications))
 * In the home tab, click the big on/off button to log in to the bot user
-* In the management tab, invite/add the bot to a guild/server
-* Now you can enter commands by either sending a direct message to the bot user, or @mention from within a channel of one of your guilds/servers. To get started, you can enter the command "help" for a list of available commands, and "help <some command name here>" for specific information about a command. Hint: With the command "prefix" you can give it a short prefix to issue commands instead of the possibly lengthy @mention construct, and with the command "bind" you can restrict issuing of commands to one or more channels.
+* In the maintenance tab, invite/add the bot to a guild/server, if necessary
+* Now you can enter commands - either by sending a direct message to the bot user, or @mention from within a channel of one of your guilds/servers. To get started, you can enter the command "help" for a list of available commands, and "help <some command name here>" for specific information about a command. (Some hints: With the command "prefix" you can give it a short prefix to issue commands instead of the possibly lengthy @mention construct, and with the command "bind" you can restrict issuing of commands to one or more channels)
 * Issue the command "join" to bring the bot user up in a voice channel
 * In the settings tab, enable "speaking" and select a recording device (default one being your microphone, most likely)
 * Now it should be sending audio from the selected recording device to discord. Have a look at the **Binaries>Tools** section below a few suggestions.
