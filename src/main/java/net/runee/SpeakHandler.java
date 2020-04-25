@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.runee.errors.BassException;
 import net.runee.misc.MemoryQueue;
 import net.runee.misc.Utils;
+import net.runee.misc.logging.Logger;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpeakHandler implements AudioSendHandler, Closeable {
+    private static final Logger logger = new Logger(SpeakHandler.class);
     public static final int FRAME_MILLIS = 20;
     public static final int MAX_LAG = 200;
     private static List<SpeakHandler> activeHandlers = new ArrayList<>();
@@ -118,7 +120,7 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
             synchronized (memoryQueueLock) {
                 memoryQueue.clear();
             }
-            System.out.println("WARNING: SpeakHandler is " + lag + " ms behind! Clearing queue...");
+            logger.warn("SpeakHandler is " + lag + " ms behind! Clearing queue...");
         }
         return memoryQueue.size() >= buffer.length;
     }

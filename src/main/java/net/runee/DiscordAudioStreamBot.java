@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -23,20 +24,22 @@ import net.runee.errors.BassException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
 import net.runee.misc.discord.CommandContext;
+import net.runee.misc.logging.Logger;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.List;
 
 public class DiscordAudioStreamBot extends ListenerAdapter {
+    private static final Logger logger = new Logger(DiscordAudioStreamBot.class);
     public static final String NAME = "Discord Audio Stream Bot";
     public static final String GITHUB_URL = "https://github.com/BinkanSalaryman/Discord-Audio-Stream-Bot";
 
@@ -45,14 +48,13 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     public static DiscordAudioStreamBot getInstance() {
         if (instance == null) {
-            try {
-                instance = new DiscordAudioStreamBot();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                System.exit(-1);
-            }
+            instance = new DiscordAudioStreamBot();
         }
         return instance;
+    }
+
+    public static boolean hasInstance() {
+        return instance != null;
     }
 
     // data
@@ -65,41 +67,39 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     private Gson gson;
     private List<Command> commands;
 
-    private DiscordAudioStreamBot() throws IOException {
-        BassInit.loadLibraries();
-        Runtime.getRuntime().addShutdownHook(new Thread(this::onSystemShutdown));
+    private DiscordAudioStreamBot() {
         gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .setLenient()
                 .create()
         ;
 
-        // load files
-        if (configPath.exists()) {
-            config = gson.fromJson(Utils.readAllText(configPath), Config.class);
-        } else {
-            config = new Config();
-            saveConfig();
+        // load config
+        try {
+            if (configPath.exists()) {
+                config = gson.fromJson(Utils.readAllText(configPath), Config.class);
+            } else {
+                config = new Config();
+                saveConfig();
+            }
+        } catch (IOException ex) {
+            logger.warn("Failed to load or create new config file", ex);
         }
     }
 
     public void login() throws LoginException {
+        logger.info("Logging in...");
         jda = new JDABuilder(AccountType.BOT)
                 .addEventListeners(this)
                 .setToken(config.botToken)
+                .setEnableShutdownHook(false)
                 .build();
     }
 
     public void logoff() {
+        logger.info("Logging off...");
         if (jda != null) {
             jda.shutdown();
-        }
-    }
-
-    private void onSystemShutdown() {
-        // TODO doesn't work??
-        if (jda != null) {
-            jda.shutdownNow();
         }
     }
 
@@ -156,6 +156,21 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     @Override
     public void onShutdown(@Nonnull ShutdownEvent e) {
         leaveVoiceAll();
+    }
+
+    @Override
+    public void onStatusChange(@Nonnull StatusChangeEvent e) {
+        switch (e.getNewValue()) {
+            case CONNECTED:
+                logger.info("Logged in");
+                break;
+            case SHUTDOWN:
+                logger.info("Logged off");
+                break;
+            case FAILED_TO_LOGIN:
+                logger.info("Failed to login");
+                break;
+        }
     }
 
     @Override
@@ -270,7 +285,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                         }
                     }
                 } catch (BassException ex) {
-                    ex.printStackTrace();
+                    logger.error("Failed to pause/unpause speak handler for guild " + audioManager.getGuild().getName());
                 }
             }
 
@@ -311,7 +326,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                 try {
                     ((SpeakHandler) sendingHandler).openRecordingDevice(Utils.getRecordingDeviceHandle(recordingDevice));
                 } catch (BassException ex) {
-                    ex.printStackTrace();
+                    logger.error("Failed to open recording device '" + recordingDevice + "'", ex);
                     sendingHandler = null;
                     speakEnabled = false;
                 }
@@ -342,7 +357,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                 try {
                     ((ListenHandler) receivingHandler).openPlaybackDevice(Utils.getPlaybackDeviceHandle(playbackDevice));
                 } catch (BassException ex) {
-                    ex.printStackTrace();
+                    logger.error("Failed to open playback device '" + playbackDevice + "'", ex);
                     receivingHandler = null;
                     listenEnabled = false;
                 }

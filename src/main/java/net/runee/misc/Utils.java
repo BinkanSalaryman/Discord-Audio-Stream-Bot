@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.runee.errors.BassException;
 import net.runee.misc.gui.SpecBuilder;
+import net.runee.misc.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,12 +23,13 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public final class Utils {
     private Utils() {
@@ -43,6 +45,7 @@ public final class Utils {
     public static final int numMaxEmbedFields = 25;
 
     // private
+    private static final Logger logger = new Logger(Utils.class);
     private static Map<Integer, BufferedImage> missingIconCache = new HashMap<>();
 
     public static String readAllText(File file) throws IOException {
@@ -85,7 +88,7 @@ public final class Utils {
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
             return ImageIO.read(conn.getInputStream());
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.warn("Failed to download image", ex);
             return null;
         }
     }
@@ -213,13 +216,13 @@ public final class Utils {
     }
 
     public static ImageIcon getIcon(String file, int size, boolean useMissingIcon) {
-        file = "/net/runee/resources/icons/" + file;
-        InputStream stream = Utils.class.getResourceAsStream(file);
-        if(stream != null) {
+        String path = "/net/runee/resources/icons/" + file;
+        InputStream stream = Utils.class.getResourceAsStream(path);
+        if (stream != null) {
             try {
                 return new ImageIcon(aspectFit(ImageIO.read(stream), size, size));
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.warn("Failed to get icon '" + file + "'", ex);
             }
         }
         return useMissingIcon ? new ImageIcon(missingIcon(size)) : null;
@@ -237,8 +240,7 @@ public final class Utils {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (IOException ignore) {
             }
         }
     }
@@ -389,7 +391,7 @@ public final class Utils {
                     if (isString) {
                         arg.append(c);
                     } else {
-                        if(i > 0 &&  args.charAt(i-1) != ARGSEP_CHAR) {
+                        if (i > 0 && args.charAt(i - 1) != ARGSEP_CHAR) {
                             result.add(arg.toString());
                             arg.delete(0, arg.length());
                         }
@@ -438,5 +440,19 @@ public final class Utils {
         } else {
             return 0;
         }
+    }
+
+    public static boolean browseUrl(String url) {
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(url));
+                return true;
+            } catch (IOException | URISyntaxException ex) {
+                logger.error("Failed to browse URL", ex);
+            }
+        } else {
+            logger.warn("Desktop is not supported, can't browse URL");
+        }
+        return false;
     }
 }

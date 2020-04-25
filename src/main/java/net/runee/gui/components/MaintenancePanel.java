@@ -13,10 +13,6 @@ import net.runee.misc.gui.SpecBuilder;
 
 import javax.annotation.Nonnull;
 import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class MaintenancePanel extends JPanel implements EventListener {
     // components
@@ -44,15 +40,9 @@ public class MaintenancePanel extends JPanel implements EventListener {
         guilds.addListSelectionListener(e -> updateGuildControls());
         addGuild = new JButton("Invite bot...");
         addGuild.addActionListener(e -> {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    Desktop.getDesktop().browse(new URI(DiscordAudioStreamBot.getInstance().getInviteUrl()));
-                    return;
-                } catch (IOException | URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
+            if(!Utils.browseUrl(DiscordAudioStreamBot.getInstance().getInviteUrl())) {
+                JOptionPane.showMessageDialog(this, "Unable to open invite url in browser.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            JOptionPane.showMessageDialog(this, "Unable to open invite url in browser.", "Error", JOptionPane.ERROR_MESSAGE);
         });
         removeGuild = new JButton("Leave guild");
         removeGuild.addActionListener(e -> {

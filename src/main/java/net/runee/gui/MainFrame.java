@@ -1,5 +1,6 @@
 package net.runee.gui;
 
+import jouvieje.bass.BassInit;
 import net.dv8tion.jda.api.JDA;
 import net.runee.DiscordAudioStreamBot;
 import net.runee.gui.components.MaintenancePanel;
@@ -7,21 +8,59 @@ import net.runee.gui.components.HomePanel;
 import net.runee.gui.components.SettingsPanel;
 import net.runee.misc.Utils;
 import net.runee.misc.gui.BorderPanel;
+import net.runee.misc.logging.Logger;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class MainFrame extends JFrame implements Runnable {
-    static {
+    private static final Logger logger = new Logger(MainFrame.class);
+    private static MainFrame instance;
+
+    public static void main(String[] args) {
+        logger.info("Hello World!");
+
+        // add shutdown hook
+        Thread shutdownThread = new Thread(MainFrame::onRuntimeShutdown);
+        shutdownThread.setName("DASB Shutdown Hook");
+        shutdownThread.setDaemon(false);
+        Runtime.getRuntime().addShutdownHook(shutdownThread);
+
+        Thread.setDefaultUncaughtExceptionHandler(MainFrame::uncaughtException);
+
+        // set L&F
         try {
             UIManager.setLookAndFeel("com.jgoodies.looks.windows.WindowsLookAndFeel");
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.warn("Failed to set L&F", ex);
         }
+
+        // load libraries
+        BassInit.loadLibraries();
+
+        // run app
+        EventQueue.invokeLater(getInstance());
     }
 
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new MainFrame());
+    private static MainFrame getInstance() {
+        if (instance == null) {
+            instance = new MainFrame();
+        }
+        return instance;
+    }
+
+    private static void uncaughtException(Thread t, Throwable e) {
+        logger.error("Uncaught exception in thread " + t.getName(), e);
+        JOptionPane.showMessageDialog(instance, "A fatal error occurred and the application will be closed.\nThe logs can be found at " + Logger.logPath.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+        System.exit(-1);
+    }
+
+    private static void onRuntimeShutdown() {
+        logger.info("Goodbye!");
     }
 
     private JTabbedPane tabs;
@@ -32,10 +71,21 @@ public class MainFrame extends JFrame implements Runnable {
     private int idxSettings;
     private SettingsPanel tabSettings;
 
-    public MainFrame() {
+    private MainFrame() {
         updateTitle();
         setIconImage(Utils.getIcon("icomoon/32px/017-headphones.png", 32, true).getImage());
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                JDA jda = DiscordAudioStreamBot.getInstance().getJDA();
+                if (jda != null) {
+                    jda.shutdownNow();
+                }
+                MainFrame.this.dispose();
+                System.exit(0);
+            }
+        });
 
         initComponents();
         layoutComponents();

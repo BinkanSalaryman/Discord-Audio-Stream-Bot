@@ -7,8 +7,11 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.runee.errors.CommandException;
 import net.runee.errors.GuildContextRequiredException;
 import net.runee.misc.Utils;
+import net.runee.misc.logging.Logger;
 
 public class CommandContext {
+    private static final Logger logger = new Logger(CommandContext.class);
+
     public CommandContext(JDA jda, User author, MessageChannel replyChannel) {
         this(jda, author, replyChannel, null);
     }
@@ -68,7 +71,7 @@ public class CommandContext {
                     .build()
             );
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Failed to execute command '" + command.getName() + " " + String.join(" ", args) + "'", ex);
             replyWarning("Failed to execute command, please take a look at the console for details!");
         }
         this.command = null;

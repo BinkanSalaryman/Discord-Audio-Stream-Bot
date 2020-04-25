@@ -2,7 +2,6 @@ package net.runee.gui.components;
 
 import com.jgoodies.forms.builder.FormBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
@@ -10,16 +9,14 @@ import net.runee.DiscordAudioStreamBot;
 import net.runee.gui.MainFrame;
 import net.runee.misc.Utils;
 import net.runee.misc.gui.SpecBuilder;
+import net.runee.misc.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class HomePanel extends JPanel implements EventListener {
+    private static final Logger logger = new Logger(HomePanel.class);
     private JLabel loginLabel;
     private JButton loginButton;
     private MainFrame mainFrame;
@@ -54,8 +51,9 @@ public class HomePanel extends JPanel implements EventListener {
                         bot.login();
                         bot.getJDA().addEventListener(this);
                     } catch (LoginException ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showMessageDialog(HomePanel.this, "Failed to log in:\n\n" + ex, "Error", JOptionPane.ERROR_MESSAGE);
+                        logger.error("Failed to log in", ex);
+                        JOptionPane.showMessageDialog(HomePanel.this, "Failed to log in:\n\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        loginButton.setEnabled(true);
                     }
                     break;
             }
@@ -105,7 +103,7 @@ public class HomePanel extends JPanel implements EventListener {
     }
 
     public void updateLoginStatus(JDA.Status status, boolean initial) {
-        loginLabel.setText(format(status));
+        loginLabel.setText("<html><center>Status:<br>"+format(status)+"</center></html>");
         switch (status) {
             case CONNECTED:
                 loginLabel.setForeground(Utils.colorGreen);
