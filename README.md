@@ -10,7 +10,7 @@
 ![preview](https://i.imgur.com/lODMwHI.png)
 
 ## Instructions
-* Run the bot program using **run win64.bat** (assuming you are using Windows 64-bit)
+* Run the bot program using **run win64.bat** or **run win32.bat** (depending on your PC's architecture; in case one doesn't work, please try the other one!)
 * In the settings tab, insert your bot token (assuming you have already created an application with a bot user [here](https://discordapp.com/developers/applications))
 * In the home tab, click the big on/off button to log in to the bot user
 * In the maintenance tab, invite/add the bot to a guild/server, if necessary
@@ -29,5 +29,9 @@
 
 ## If you enjoy my work
 Have a chat with me if you feel like it, my username in discord is **敏感サラリーマン#3306**.
+
+![flag_US](https://i.imgur.com/ohuanEH.png) Hi, I'm not a native english speaker, so please bare with me if I do mindless/subconscious grammar mistakes or the like.<p>
+![flag_DE](https://i.imgur.com/ZwReBfl.png) Hallo, wenn du magst können wir auf Deutsch kommunizieren. Solltest du mich wegen eines Problems anschreiben, erwarte ich aber zumindest dass du das README durchgelesen und verstanden hast<p>
+![flag_JP](https://i.imgur.com/hCrtRjG.png) 今晩は。日本語はちょっとだけ身につけましたけれど、ドイツの出身ですから宜しくお願いしますね。<p>
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://goo.gl/x3BXFW)
