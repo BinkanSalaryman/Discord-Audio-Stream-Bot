@@ -30,8 +30,8 @@
 ## If you enjoy my work
 Have a chat with me if you feel like it, my username in discord is **敏感サラリーマン#3306**.
 
-![flag_US](https://i.imgur.com/ohuanEH.png) Hi, I'm not a native english speaker, so please bare with me if I do mindless/subconscious grammar mistakes or the like.<p>
+![flag_US](https://i.imgur.com/ohuanEH.png) Hi, I'm not a native english speaker, so please bare with me if I do mindless/subconscious grammar mistakes or the like. If you are going to contact me for a problem, I expect you having fully read & understood this README.<p>
 ![flag_DE](https://i.imgur.com/ZwReBfl.png) Hallo, wenn du magst können wir auf Deutsch kommunizieren. Solltest du mich wegen eines Problems anschreiben, erwarte ich aber zumindest dass du das README durchgelesen und verstanden hast<p>
-![flag_JP](https://i.imgur.com/hCrtRjG.png) 今晩は。日本語はちょっとだけ身につけましたけれど、ドイツの出身ですから宜しくお願いしますね。<p>
+![flag_JP](https://i.imgur.com/hCrtRjG.png) こんばんは。日本語はちょっとだけ身につけましたけれど、ドイツの出身ですからよろしくお願いしますね。問題について連絡しようとするまえにぜひこのREADME（説明書）を全的に読んでください。config.jsonというファイルをメモ帳で編集する必要ないです！それは過去のソフトバンの方法です。<p>
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://goo.gl/x3BXFW)
