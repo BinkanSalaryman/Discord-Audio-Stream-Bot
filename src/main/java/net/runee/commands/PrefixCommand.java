@@ -60,7 +60,7 @@ public class PrefixCommand extends Command {
 
     private void showPrefix(CommandContext ctx) throws CommandException {
         final Guild guild = ctx.ensureGuildContext();
-        GuildConfig guildConfig = DiscordAudioStreamBot.getInstance().getConfig().getGuildConfig(guild);
+        GuildConfig guildConfig = getConfig().getGuildConfig(guild);
         if (guildConfig != null && guildConfig.commandPrefix != null) {
             ctx.replySuccess("Current command prefix: `" + guildConfig.commandPrefix + "`.");
         } else {
@@ -70,7 +70,7 @@ public class PrefixCommand extends Command {
 
     private void setPrefix(CommandContext ctx, String prefix) throws CommandException {
         final Guild guild = ctx.ensureAdminPermission();
-        final Config config = DiscordAudioStreamBot.getInstance().getConfig();
+        final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
         if (guildConfig != null) {
             guildConfig.commandPrefix = prefix;
@@ -79,11 +79,7 @@ public class PrefixCommand extends Command {
             guildConfig.commandPrefix = prefix;
             config.addGuildConfig(guildConfig);
         }
-        try {
-            DiscordAudioStreamBot.getInstance().saveConfig();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        saveConfig();
         if (prefix != null) {
             ctx.replySuccess("Command prefix updated.");
         } else {

@@ -15,6 +15,8 @@ public class StatusCommand extends Command {
 
     @Override
     public void execute(CommandContext ctx, String... args) throws CommandException {
+        ctx.ensureOwnerPermission();
+
         // parse args
         if (args.length != 1) {
             throw new IncorrectArgCountException(this, ctx);

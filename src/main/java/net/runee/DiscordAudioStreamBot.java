@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.entities.DataMessage;
 import net.runee.commands.*;
+import net.runee.commands.audio.AutoJoinVoiceCommand;
 import net.runee.commands.audio.JoinVoiceCommand;
 import net.runee.commands.audio.LeaveVoiceAllCommand;
 import net.runee.commands.audio.LeaveVoiceCommand;
@@ -42,7 +43,12 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     public static final String GITHUB_URL = "https://github.com/BinkanSalaryman/Discord-Audio-Stream-Bot";
 
     private static DiscordAudioStreamBot instance;
-    private static final File configPath = new File("config.json");
+    public static final File configPath = new File("config.json");
+    private static Config config;
+    private static final Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .setLenient()
+            .create();
 
     public static DiscordAudioStreamBot getInstance() {
         if (instance == null) {
@@ -55,34 +61,39 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         return instance != null;
     }
 
+    public static Config getConfig() {
+        if (config == null) {
+            // load config
+            try {
+                if (configPath.exists()) {
+                    config = gson.fromJson(Utils.readAllText(configPath), Config.class);
+                } else {
+                    config = new Config();
+                    saveConfig();
+                }
+            } catch (IOException ex) {
+                logger.warn("Failed to load or create new config file", ex);
+            }
+        }
+        return config;
+    }
+
+    public static void setConfig(Config config) {
+        DiscordAudioStreamBot.config = config;
+    }
+
+    public static void saveConfig() throws IOException {
+        Utils.writeAllText(configPath, gson.toJson(config));
+    }
+
     // data
     private JDA jda;
 
-    // files
-    private Config config;
-
     // convenience
-    private Gson gson;
     private List<Command> commands;
 
     private DiscordAudioStreamBot() {
-        gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .setLenient()
-                .create()
-        ;
 
-        // load config
-        try {
-            if (configPath.exists()) {
-                config = gson.fromJson(Utils.readAllText(configPath), Config.class);
-            } else {
-                config = new Config();
-                saveConfig();
-            }
-        } catch (IOException ex) {
-            logger.warn("Failed to load or create new config file", ex);
-        }
     }
 
     public void login() throws LoginException {
@@ -110,22 +121,6 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         return jda;
     }
 
-    public Gson getGson() {
-        return gson;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
-    public void saveConfig() throws IOException {
-        Utils.writeAllText(configPath, gson.toJson(config));
-    }
-
     public String getInviteUrl() {
         return jda.getInviteUrl(Permission.EMPTY_PERMISSIONS);
     }
@@ -146,7 +141,8 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                     // audio
                     new JoinVoiceCommand(),
                     new LeaveVoiceCommand(),
-                    new LeaveVoiceAllCommand()
+                    new LeaveVoiceAllCommand(),
+                    new AutoJoinVoiceCommand()
                     // tools
                     //new MessageCommand(),
                     //new TestCommand(),
@@ -157,7 +153,26 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     @Override
     public void onReady(@Nonnull ReadyEvent e) {
-
+        for (GuildConfig guildConfig : Utils.nullListToEmpty(getConfig().guildConfigs)) {
+            if (guildConfig.autoJoinVoiceChanncelId != null) {
+                Guild guild = jda.getGuildById(guildConfig.guildId);
+                if (guild == null) {
+                    logger.warn("Failed to retrieve guild with id '" + guildConfig.guildId + "' to auto-join voice");
+                    continue;
+                }
+                VoiceChannel channel = guild.getVoiceChannelById(guildConfig.autoJoinVoiceChanncelId);
+                if (channel == null) {
+                    logger.warn("Voice channel with id '" + guildConfig.autoJoinVoiceChanncelId + "' not found in guild " + guild.getName() + ", removing...");
+                    try {
+                        saveConfig();
+                    } catch (IOException ex) {
+                        logger.warn("Failed to save config", ex);
+                    }
+                    continue;
+                }
+                joinVoice(channel);
+            }
+        }
     }
 
     @Override
@@ -292,7 +307,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                         }
                     }
                 } catch (BassException ex) {
-                    logger.error("Failed to pause/unpause speak handler for guild " + audioManager.getGuild().getName());
+                    logger.error("Failed to pause/unpause speak handler for guild " + audioManager.getGuild().getName(), ex);
                 }
             }
 

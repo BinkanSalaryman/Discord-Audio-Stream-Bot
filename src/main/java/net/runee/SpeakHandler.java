@@ -86,8 +86,6 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
     private static boolean RECORDPROC(HRECORD handle, ByteBuffer buffer, int length, Pointer user) {
         List<SpeakHandler> handlers = getActiveHandlers(handle);
 
-        // FIXME distorted after re-joining voice channel or some ****
-
         byte[] sampleBuffer = new byte[2];
         int numSamplesToWrite = length / sampleBuffer.length;
         for (int s = 0; s < numSamplesToWrite; s++) {
@@ -120,7 +118,7 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
             synchronized (memoryQueueLock) {
                 memoryQueue.clear();
             }
-            logger.warn("SpeakHandler is " + lag + " ms behind! Clearing queue...");
+            logger.warn("SpeakHandler is " + (int)lag + " ms behind! Clearing queue...");
         }
         return memoryQueue.size() >= buffer.length;
     }

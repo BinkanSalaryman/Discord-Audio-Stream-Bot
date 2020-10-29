@@ -12,6 +12,7 @@ public class GuildConfig {
     public String guildId;
     public String commandPrefix;
     public Set<String> commandChannelIds;
+    public String autoJoinVoiceChanncelId;
 
     public GuildConfig() {
 
@@ -24,6 +25,7 @@ public class GuildConfig {
     public GuildConfig(GuildConfig copy) {
         this.guildId = copy.guildId;
         this.commandPrefix = copy.commandPrefix;
+        this.autoJoinVoiceChanncelId = copy.autoJoinVoiceChanncelId;
         if(copy.commandChannelIds != null) {
             this.commandChannelIds = new HashSet<>(copy.commandChannelIds);
         }

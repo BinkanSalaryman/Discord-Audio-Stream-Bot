@@ -15,7 +15,7 @@ public class ActivityCommand extends Command {
 
     @Override
     public void execute(CommandContext ctx, String... args) throws CommandException {
-        ctx.ensureAdminPermission();
+        ctx.ensureOwnerPermission();
 
         // parse args
         if (args.length < 2) {

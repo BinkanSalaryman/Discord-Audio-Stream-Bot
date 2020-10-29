@@ -12,6 +12,7 @@ public class Config {
     public String recordingDevice;
     public Boolean listenEnabled;
     public String playbackDevice;
+    public Boolean clearLogOnStart;
     public List<GuildConfig> guildConfigs;
 
     public Config() {
@@ -24,6 +25,7 @@ public class Config {
         this.recordingDevice = copy.recordingDevice;
         this.listenEnabled = copy.listenEnabled;
         this.playbackDevice = copy.playbackDevice;
+        this.clearLogOnStart = copy.clearLogOnStart;
         if(copyGuildConfigs && copy.guildConfigs != null) {
             this.guildConfigs = new ArrayList<>();
             for (GuildConfig guildConfig : copy.guildConfigs) {
@@ -55,6 +57,10 @@ public class Config {
             }
         }
         return null;
+    }
+
+    public boolean getClearLogOnStart() {
+        return clearLogOnStart != null ? clearLogOnStart : true;
     }
 
     public void addGuildConfig(GuildConfig guildConfig) {

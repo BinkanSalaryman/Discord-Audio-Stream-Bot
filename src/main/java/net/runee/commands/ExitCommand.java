@@ -1,6 +1,7 @@
 package net.runee.commands;
 
 import net.runee.errors.CommandException;
+import net.runee.gui.MainFrame;
 import net.runee.misc.discord.Command;
 import net.runee.misc.discord.CommandContext;
 
@@ -12,13 +13,10 @@ public class ExitCommand extends Command {
 
     @Override
     public void execute(CommandContext ctx, String... args) throws CommandException {
-        if(ctx.getGuild() != null) {
-            ctx.ensureAdminPermission();
-        } else {
-            ctx.ensureOwnerPermission();
-        }
+        ctx.ensureOwnerPermission();
         ctx.replySuccess("0xDEADBEEF");
-        ctx.getJDA().shutdown();
+        ctx.getJDA().shutdownNow();
+        MainFrame.getInstance().dispose();
         System.exit(0);
     }
 }

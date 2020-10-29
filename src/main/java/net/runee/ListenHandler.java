@@ -24,7 +24,7 @@ public class ListenHandler implements AudioReceiveHandler, Closeable {
 
     public static final int MAX_LAG = 200;
     public static final int PLAYBACK_FLAGS = 0; //BASS_DEVICE.BASS_DEVICE_3D;
-    private static List<ListenHandler> activeHandlers = new ArrayList<>();
+    private static final List<ListenHandler> activeHandlers = new ArrayList<>();
 
     private final Object memoryQueueLock = new Object();
     private int playbackDevice;
@@ -86,9 +86,6 @@ public class ListenHandler implements AudioReceiveHandler, Closeable {
     private static int STREAMPROC(HSTREAM handle, ByteBuffer buffer, int length, Pointer user) {
         List<ListenHandler> handlers = getActiveHandlers(handle);
 
-        // FIXME distorted - why??
-        // TODO check if mixing is done right
-
         int bytesPerSample = OUTPUT_FORMAT.getSampleSizeInBits() / 8;
 
         int maxSampleCount = 0; // biggest sample count in handlers
@@ -106,7 +103,7 @@ public class ListenHandler implements AudioReceiveHandler, Closeable {
                     int sampleCount = handler.memoryQueue.size() / bytesPerSample;
                     if (s == maxSampleCount - sampleCount) {
                         handler.memoryQueue.dequeue(sampleBuffer, 0, sampleBuffer.length);
-                        sample = sampleBuffer[0] << 8 | sampleBuffer[1];
+                        sample = (short)((sampleBuffer[0] & 0xff) << 8) | ((short) (sampleBuffer[1] & 0xff));
                     } else {
                         sample = 0;
                     }
@@ -121,12 +118,12 @@ public class ListenHandler implements AudioReceiveHandler, Closeable {
         }
 
         for (ListenHandler handler : handlers) {
-            float lag = handler.memoryQueue.size() / (INPUT_FORMAT.getChannels() * INPUT_FORMAT.getSampleRate() * (1f / 1000f) * (INPUT_FORMAT.getSampleSizeInBits() / 8));
+            float lag = handler.memoryQueue.size() / (INPUT_FORMAT.getChannels() * INPUT_FORMAT.getSampleRate() * (1 / 1000f) * (INPUT_FORMAT.getSampleSizeInBits() >> 3));
             if (lag >= MAX_LAG) {
                 synchronized (handler.memoryQueueLock) {
                     handler.memoryQueue.clear();
                 }
-                logger.warn("ListenHandler is " + lag + " ms behind! Clearing queue...");
+                logger.warn("ListenHandler is " + (int)lag + " ms behind! Clearing queue...");
             }
         }
 

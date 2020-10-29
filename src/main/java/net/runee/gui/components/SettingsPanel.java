@@ -5,7 +5,6 @@ import jouvieje.bass.Bass;
 import jouvieje.bass.structures.BASS_DEVICEINFO;
 import net.dv8tion.jda.api.JDA;
 import net.runee.DiscordAudioStreamBot;
-import net.runee.errors.BassException;
 import net.runee.gui.renderer.PlaybackDeviceListCellRenderer;
 import net.runee.gui.renderer.RecordingDeviceListCellRenderer;
 import net.runee.gui.listitems.PlaybackDeviceItem;
@@ -21,6 +20,7 @@ import java.util.Objects;
 public class SettingsPanel extends JPanel {
     // general
     private JTextField botToken;
+    private JCheckBox clearLogOnStart;
 
     // audio
     private JCheckBox speakEnabled;
@@ -40,7 +40,12 @@ public class SettingsPanel extends JPanel {
         // general
         botToken = new JTextField();
         Utils.addChangeListener(botToken, e -> {
-            bot.getConfig().botToken = Utils.emptyStringToNull(((JTextField) e.getSource()).getText());
+            DiscordAudioStreamBot.getConfig().botToken = Utils.emptyStringToNull(((JTextField) e.getSource()).getText());
+            saveConfig();
+        });
+        clearLogOnStart = new JCheckBox();
+        clearLogOnStart.addActionListener(e -> {
+            DiscordAudioStreamBot.getConfig().clearLogOnStart = ((JCheckBox) e.getSource()).isSelected();
             saveConfig();
         });
 
@@ -50,7 +55,7 @@ public class SettingsPanel extends JPanel {
             boolean speakEnabled = ((JCheckBox) e.getSource()).isSelected();
             bot.setSpeakEnabled(speakEnabled);
             recordingDevices.setEnabled(speakEnabled);
-            bot.getConfig().speakEnabled = speakEnabled;
+            DiscordAudioStreamBot.getConfig().speakEnabled = speakEnabled;
             saveConfig();
         });
         listenEnabled = new JCheckBox();
@@ -58,7 +63,7 @@ public class SettingsPanel extends JPanel {
             boolean listenEnabled = ((JCheckBox) e.getSource()).isSelected();
             bot.setListenEnabled(listenEnabled);
             playbackDevices.setEnabled(listenEnabled);
-            bot.getConfig().listenEnabled = listenEnabled;
+            DiscordAudioStreamBot.getConfig().listenEnabled = listenEnabled;
             saveConfig();
         });
         recordingDevices = new JList<>();
@@ -69,7 +74,7 @@ public class SettingsPanel extends JPanel {
                 RecordingDeviceItem value = recordingDevices.getSelectedValue();
                 String recordingDevice = value != null ? value.getName() : null;
                 bot.setRecordingDevice(recordingDevice);
-                bot.getConfig().recordingDevice = recordingDevice;
+                DiscordAudioStreamBot.getConfig().recordingDevice = recordingDevice;
                 saveConfig();
             }
         });
@@ -81,17 +86,18 @@ public class SettingsPanel extends JPanel {
                 PlaybackDeviceItem value = playbackDevices.getSelectedValue();
                 String playbackDevice = value != null ? value.getName() : null;
                 bot.setPlaybackDevice(playbackDevice);
-                bot.getConfig().playbackDevice = playbackDevice;
+                DiscordAudioStreamBot.getConfig().playbackDevice = playbackDevice;
                 saveConfig();
             }
         });
     }
 
     private void loadConfig() {
-        final Config config = DiscordAudioStreamBot.getInstance().getConfig();
+        final Config config = DiscordAudioStreamBot.getConfig();
 
         // general
         botToken.setText(Utils.nullToEmptyString(config.botToken));
+        clearLogOnStart.setSelected(config.getClearLogOnStart());
 
         // audio
         speakEnabled.setSelected(config.getSpeakEnabled());
@@ -138,9 +144,9 @@ public class SettingsPanel extends JPanel {
 
     private void saveConfig() {
         try {
-            DiscordAudioStreamBot.getInstance().saveConfig();
+            DiscordAudioStreamBot.saveConfig();
         } catch (IOException ex) {
-            Utils.guiError(this, "Failed to save config.", ex);
+            Utils.guiError(this, "Failed to save config", ex);
         }
     }
 
@@ -160,7 +166,7 @@ public class SettingsPanel extends JPanel {
                 .rows(SpecBuilder
                         .create()
                         .add("c:p") // general
-                        .add("c:p", 1)
+                        .add("c:p", 2)
                         .gapUnrelated().add("c:p")
                         .add("c:p", 2)
                         .build()
@@ -171,6 +177,8 @@ public class SettingsPanel extends JPanel {
                 .addSeparator("General").xyw(1, row, 7)
                 .add("Bot token").xy(1, row += 2)
                 /**/.add(botToken).xyw(3, row, 5)
+                .add("Clear log on startup").xy(1, row += 2)
+                /**/.add(clearLogOnStart).xyw(3, row, 5)
                 .addSeparator("Audio").xyw(1, row += 2, 7)
                 .add("Speaking enabled").xy(1, row += 2)
                 /**/.add(speakEnabled).xy(3, row)

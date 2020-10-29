@@ -10,6 +10,7 @@ import net.runee.gui.components.SettingsPanel;
 import net.runee.misc.Utils;
 import net.runee.misc.gui.BorderPanel;
 import net.runee.misc.logging.Logger;
+import net.runee.misc.logging.appender.Appender;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,8 +22,6 @@ public class MainFrame extends JFrame implements Runnable {
     private static MainFrame instance;
 
     public static void main(String[] args) {
-        logger.info("Hello World!");
-
         // add shutdown hook
         Thread shutdownThread = new Thread(MainFrame::onRuntimeShutdown);
         shutdownThread.setName("DASB Shutdown Hook");
@@ -30,6 +29,12 @@ public class MainFrame extends JFrame implements Runnable {
         Runtime.getRuntime().addShutdownHook(shutdownThread);
 
         Thread.setDefaultUncaughtExceptionHandler(MainFrame::uncaughtException);
+
+        if (DiscordAudioStreamBot.getConfig().getClearLogOnStart()) {
+            Logger.logPath.delete();
+        }
+
+        logger.info("Hello World!");
 
         // set L&F
         try {
@@ -48,11 +53,15 @@ public class MainFrame extends JFrame implements Runnable {
         EventQueue.invokeLater(getInstance());
     }
 
-    private static MainFrame getInstance() {
+    public static MainFrame getInstance() {
         if (instance == null) {
             instance = new MainFrame();
         }
         return instance;
+    }
+
+    public static boolean hasInstance() {
+        return instance != null;
     }
 
     private static void uncaughtException(Thread t, Throwable e) {

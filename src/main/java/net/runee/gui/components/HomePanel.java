@@ -42,7 +42,7 @@ public class HomePanel extends JPanel implements EventListener {
                     break;
                 case SHUTDOWN:
                 case FAILED_TO_LOGIN:
-                    if (bot.getConfig().botToken == null) {
+                    if (DiscordAudioStreamBot.getConfig().botToken == null) {
                         JOptionPane.showMessageDialog(HomePanel.this, "A bot token must be set.", "Error", JOptionPane.ERROR_MESSAGE);
                         loginButton.setEnabled(true);
                         return;

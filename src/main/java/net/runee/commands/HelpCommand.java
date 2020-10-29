@@ -24,14 +24,12 @@ public class HelpCommand extends Command {
         final List<Command> allCommands = DiscordAudioStreamBot.getInstance().getCommands();
         switch (args.length) {
             case 0: {
-                Map<CommandCategory, List<Command>> categorizedCommands = new HashMap<>();
-                for (Command cmd : allCommands) {
-                    List<Command> commands = categorizedCommands.get(cmd.getCategory());
-                    if (commands == null) {
-                        commands = new ArrayList<>();
-                    }
-                    commands.add(cmd);
-                    categorizedCommands.put(cmd.getCategory(), commands);
+                Map<CommandCategory, List<Command>> categorizedCommands = new LinkedHashMap<>();
+                for (CommandCategory category : CommandCategory.values()) {
+                    categorizedCommands.put(category, new ArrayList<>());
+                }
+                for (Command cmd : allCommands.stream().sorted(Comparator.comparing(Command::getName)).collect(Collectors.toList())) {
+                    categorizedCommands.get(cmd.getCategory()).add(cmd);
                 }
 
                 EmbedBuilder embed = new EmbedBuilder()
@@ -39,8 +37,10 @@ public class HelpCommand extends Command {
                         .setColor(Utils.colorYellow);
                 for (Map.Entry<CommandCategory, List<Command>> category : categorizedCommands.entrySet()) {
                     List<Command> commands = category.getValue();
-                    String commandsHelpStr = Utils.ucListItem + commands.stream().map(this::formatSyntax).collect(Collectors.joining("\n" + Utils.ucListItem));
-                    embed.addField(formatCategory(category.getKey()), commandsHelpStr, false);
+                    if(!commands.isEmpty()) {
+                        String commandsHelpStr = Utils.ucListItem + commands.stream().map(this::formatSyntax).collect(Collectors.joining("\n" + Utils.ucListItem));
+                        embed.addField(formatCategory(category.getKey()), commandsHelpStr, false);
+                    }
                 }
                 ctx.reply(embed.build());
                 break;

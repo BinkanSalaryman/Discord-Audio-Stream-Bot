@@ -79,7 +79,7 @@ public class BindCommand extends Command {
         }
 
         // execute
-        final Config config = DiscordAudioStreamBot.getInstance().getConfig();
+        final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
         if (guildConfig == null) {
             guildConfig = new GuildConfig(guild);
@@ -107,17 +107,8 @@ public class BindCommand extends Command {
         int oldSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
         guildConfig.addCommandChannel(channel);
         int newSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
-        try {
-            DiscordAudioStreamBot.getInstance().saveConfig();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
         if (newSize != oldSize) {
-            try {
-                DiscordAudioStreamBot.getInstance().saveConfig();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            saveConfig();
             ctx.replySuccess("Bindings updated.");
         } else {
             ctx.replyWarning("Channel is already bound.");
@@ -129,11 +120,7 @@ public class BindCommand extends Command {
         guildConfig.removeCommandChannel(channel);
         int newSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
         if (newSize != oldSize) {
-            try {
-                DiscordAudioStreamBot.getInstance().saveConfig();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            saveConfig();
             ctx.replySuccess("Bindings updated.");
         }
         if (oldSize >= 0 && newSize < 0) {
@@ -143,11 +130,7 @@ public class BindCommand extends Command {
 
     private void clearCommandChannels(CommandContext ctx, GuildConfig guildConfig) {
         guildConfig.commandChannelIds = null;
-        try {
-            DiscordAudioStreamBot.getInstance().saveConfig();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        saveConfig();
         ctx.replySuccess("All bindings cleared - commands from any channel will be accepted.");
     }
 
@@ -155,14 +138,14 @@ public class BindCommand extends Command {
         if (guildConfig.commandChannelIds != null) {
             if (guildConfig.commandChannelIds.size() == 1) {
                 String channelId = guildConfig.commandChannelIds.iterator().next();
-                String commandChannelNameStr = formatTextChannelById(ctx.getJDA(), channelId);
+                String commandChannelNameStr = "`" + formatTextChannelById(ctx.getJDA(), channelId) + "`";
                 ctx.replySuccess("Current command channel: " + commandChannelNameStr);
             } else {
                 String commandChannelNamesStr = guildConfig.commandChannelIds
                         .stream()
-                        .map(channelId -> formatTextChannelById(ctx.getJDA(), channelId))
-                        .collect(Collectors.joining("\n- "));
-                ctx.replySuccess("Current command channels:\n- " + commandChannelNamesStr);
+                        .map(channelId -> "`" + formatTextChannelById(ctx.getJDA(), channelId) + "`")
+                        .collect(Collectors.joining("\n" + Utils.ucListItem));
+                ctx.replySuccess("Current command channels:\n" + Utils.ucListItem + commandChannelNamesStr);
             }
         } else {
             ctx.replySuccess("No bindings set - commands from any channel will be accepted.");
@@ -171,6 +154,6 @@ public class BindCommand extends Command {
 
     private String formatTextChannelById(JDA jda, String id) {
         TextChannel channel = jda.getTextChannelById(id);
-        return channel != null ? "`" + channel.getName() + "`" : id;
+        return channel != null ? channel.getName() : id;
     }
 }
