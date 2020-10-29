@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.internal.entities.DataMessage;
 import net.runee.commands.*;
 import net.runee.commands.audio.AutoJoinVoiceCommand;
@@ -99,6 +100,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     public void login() throws LoginException {
         logger.info("Logging in...");
         jda = JDABuilder.create(config.botToken,
+                GatewayIntent.GUILD_MEMBERS,
                 GatewayIntent.GUILD_VOICE_STATES,
                 GatewayIntent.GUILD_MESSAGES,
                 //GatewayIntent.GUILD_MESSAGE_REACTIONS,
