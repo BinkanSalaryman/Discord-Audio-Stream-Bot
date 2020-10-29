@@ -1,5 +1,6 @@
 package net.runee.gui;
 
+import com.jgoodies.common.base.SystemUtils;
 import jouvieje.bass.BassInit;
 import net.dv8tion.jda.api.JDA;
 import net.runee.DiscordAudioStreamBot;
@@ -11,8 +12,6 @@ import net.runee.misc.gui.BorderPanel;
 import net.runee.misc.logging.Logger;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -34,7 +33,10 @@ public class MainFrame extends JFrame implements Runnable {
 
         // set L&F
         try {
-            UIManager.setLookAndFeel("com.jgoodies.looks.windows.WindowsLookAndFeel");
+            if (SystemUtils.IS_OS_WINDOWS) {
+                System.setProperty("swing.systemlaf", "com.jgoodies.looks.windows.WindowsLookAndFeel");
+            }
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
             logger.warn("Failed to set L&F", ex);
         }
@@ -138,7 +140,7 @@ public class MainFrame extends JFrame implements Runnable {
     private void updateTitle() {
         final JDA jda = DiscordAudioStreamBot.getInstance().getJDA();
         JDA.Status status = jda != null ? jda.getStatus() : JDA.Status.SHUTDOWN;
-        String title = "Discord Audio Stream Bot - " + format(status);
+        String title = DiscordAudioStreamBot.NAME + " - " + format(status);
         if (status == JDA.Status.CONNECTED) {
             title += " [" + jda.getSelfUser().getName() + "]";
         }

@@ -1,7 +1,6 @@
 package net.runee.commands.tools;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.internal.entities.DataMessage;
 import net.runee.DiscordAudioStreamBot;
@@ -16,7 +15,7 @@ public class MessageCommand extends Command {
     public MessageCommand() {
         this.name = "msg";
         this.arguments = "user message";
-        this.help = "Sends a private message to a user.";
+        this.summary = "Sends a private message to a user.";
         this.category = CommandCategory.TOOLS;
     }
 

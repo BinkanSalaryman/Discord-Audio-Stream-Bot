@@ -12,7 +12,7 @@ import net.runee.misc.discord.CommandContext;
 public class InviteCommand extends Command {
     public InviteCommand() {
         this.name = "invite";
-        this.help = "Shows this bot's invite link.";
+        this.summary = "Shows this bot's invite link.";
     }
 
     @Override

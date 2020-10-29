@@ -2,7 +2,6 @@ package net.runee;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import jouvieje.bass.BassInit;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.audio.AudioReceiveHandler;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
@@ -15,6 +14,7 @@ import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.entities.DataMessage;
 import net.runee.commands.*;
 import net.runee.commands.audio.JoinVoiceCommand;
@@ -30,11 +30,9 @@ import net.runee.model.GuildConfig;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
-import java.awt.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
@@ -89,9 +87,14 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     public void login() throws LoginException {
         logger.info("Logging in...");
-        jda = new JDABuilder(AccountType.BOT)
+        jda = JDABuilder.create(config.botToken,
+                GatewayIntent.GUILD_VOICE_STATES,
+                GatewayIntent.GUILD_MESSAGES,
+                //GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                GatewayIntent.DIRECT_MESSAGES
+                //GatewayIntent.DIRECT_MESSAGE_REACTIONS
+        )
                 .addEventListeners(this)
-                .setToken(config.botToken)
                 .setEnableShutdownHook(false)
                 .build();
     }
@@ -136,14 +139,18 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                     new HelpCommand(),
                     new InviteCommand(),
                     new PrefixCommand(),
+                    new ExitCommand(),
+                    new StopCommand(),
+                    new StatusCommand(),
+                    new ActivityCommand(),
                     // audio
                     new JoinVoiceCommand(),
                     new LeaveVoiceCommand(),
                     new LeaveVoiceAllCommand()
+                    // tools
+                    //new MessageCommand(),
+                    //new TestCommand(),
             ));
-            // tools
-            //commands.add(new MessageCommand());
-            //commands.add(new TestCommand());
         }
         return commands;
     }
@@ -155,7 +162,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     @Override
     public void onShutdown(@Nonnull ShutdownEvent e) {
-        leaveVoiceAll();
+
     }
 
     @Override

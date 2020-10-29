@@ -1,7 +1,6 @@
 package net.runee.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.runee.DiscordAudioStreamBot;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
@@ -17,7 +16,7 @@ public class HelpCommand extends Command {
     public HelpCommand() {
         this.name = "help";
         this.arguments = "[command]";
-        this.help = "Shows information about specified command, or else lists all commands.";
+        this.summary = "Shows information about specified command, or else lists all commands.";
     }
 
     @Override
@@ -62,7 +61,7 @@ public class HelpCommand extends Command {
 
                 ctx.reply(new EmbedBuilder()
                         .setTitle("Help page for `" + command.getName() + "`:")
-                        .setDescription(command.getHelp())
+                        .setDescription(command.getSummary())
                         .addField("Syntax", formatSyntax(command), false)
                         .setColor(Utils.colorYellow)
                         .build()

@@ -1,10 +1,9 @@
 package net.runee.commands.audio;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.runee.DiscordAudioStreamBot;
-import net.runee.errors.BassException;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.Utils;
@@ -18,7 +17,7 @@ public class LeaveVoiceCommand extends Command {
     public LeaveVoiceCommand() {
         this.name = "leave";
         this.arguments = "[guild]";
-        this.help = "Leaves from a guild voice instance.";
+        this.summary = "Leaves from a guild voice instance.";
         this.category = CommandCategory.AUDIO;
     }
 
@@ -29,7 +28,7 @@ public class LeaveVoiceCommand extends Command {
         switch (args.length) {
             case 0: {
                 // leave automatically
-                guild = ctx.ensureGuildContext();
+                guild = ctx.ensureAdminPermission();
                 break;
             }
             case 1: {
@@ -40,9 +39,16 @@ public class LeaveVoiceCommand extends Command {
                     case 0:
                         ctx.replyWarning("No such server!");
                         return;
-                    case 1:
+                    case 1: {
                         guild = guildMatches.get(0);
+                        Member authorAsMember = guild.getMember(ctx.getAuthor());
+                        if (authorAsMember == null) {
+                            ctx.ensureOwnerPermission();
+                        } else {
+                            guild = ctx.ensureAdminPermission();
+                        }
                         break;
+                    }
                     default:
                         ctx.replyWarning("There are multiple servers with that name!");
                         return;

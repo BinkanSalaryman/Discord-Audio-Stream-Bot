@@ -4,7 +4,7 @@ import net.runee.errors.CommandException;
 
 public abstract class Command {
     protected String name;
-    protected String help = "";
+    protected String summary = "";
     protected String arguments = "";
     protected CommandCategory category = CommandCategory.GENERAL;
 
@@ -12,8 +12,8 @@ public abstract class Command {
         return name;
     }
 
-    public String getHelp() {
-        return help;
+    public String getSummary() {
+        return summary;
     }
 
     public String getArguments() {

@@ -2,11 +2,9 @@ package net.runee.commands.audio;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.runee.DiscordAudioStreamBot;
-import net.runee.errors.BassException;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.Utils;
@@ -20,14 +18,14 @@ public class JoinVoiceCommand extends Command {
     public JoinVoiceCommand() {
         this.name = "join";
         this.arguments = "[channel]";
-        this.help = "Joins a voice channel.";
+        this.summary = "Joins a voice channel.";
         this.category = CommandCategory.AUDIO;
     }
 
     @Override
     public void execute(CommandContext ctx, String... args) throws CommandException {
         // parse args
-        final Guild guild = ctx.ensureGuildContext();
+        final Guild guild = ctx.ensureAdminPermission();
         VoiceChannel channel;
         switch (args.length) {
             case 0: {
@@ -67,11 +65,6 @@ public class JoinVoiceCommand extends Command {
 
 
         // execute
-        if (guild.getAudioManager().isAttemptingToConnect()) {
-            ctx.replyWarning("The bot is already trying to connect! Enter the chill zone!");
-            return;
-        }
-
         Member self = guild.getSelfMember();
         if (!self.hasPermission(Permission.VOICE_CONNECT)) {
             // missing permissions

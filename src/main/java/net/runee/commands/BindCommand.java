@@ -2,7 +2,6 @@ package net.runee.commands;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.runee.DiscordAudioStreamBot;
 import net.runee.errors.CommandException;
@@ -21,7 +20,7 @@ public class BindCommand extends Command {
     public BindCommand() {
         this.name = "bind";
         this.arguments = "action:add|remove|clear|show [channel]";
-        this.help = "Modifies the allowed command channel list.";
+        this.summary = "Manages which channels to accept commands from.";
     }
 
     @Override
@@ -32,15 +31,24 @@ public class BindCommand extends Command {
         if (args.length == 0) {
             throw new IncorrectArgCountException(this, ctx);
         }
-        String action = args[0];
+        String action = args[0].toLowerCase();
         TextChannel channel;
 
+        // verify
+        switch (action) {
+            case "add":
+            case "remove":
+            case "clear":
+                ctx.ensureAdminPermission();
+                break;
+        }
+
+        // parse args
         switch (action) {
             case "add":
             case "remove": {
                 if (args.length != 2) {
-                    ctx.replyWarning("Incorrect number of arguments!");
-                    return;
+                    throw new IncorrectArgCountException(this, ctx);
                 }
                 String channelSearch = args[1];
                 List<TextChannel> channelMatches = Utils.findTextChannel(guild, channelSearch);
@@ -58,13 +66,16 @@ public class BindCommand extends Command {
                 }
                 break;
             }
-            default:
+            case "clear":
+            case "show":
                 if (args.length != 1) {
-                    ctx.replyWarning("Incorrect number of arguments!");
-                    return;
+                    throw new IncorrectArgCountException(this, ctx);
                 }
                 channel = null;
                 break;
+            default:
+                ctx.replyWarning("Unrecognized action: `" + action + "`.");
+                return;
         }
 
         // execute
@@ -76,44 +87,85 @@ public class BindCommand extends Command {
         }
         switch (action) {
             case "add":
-                guildConfig.addCommandChannel(channel);
+                addCommandChannel(ctx, guildConfig, channel);
                 break;
             case "remove":
-                guildConfig.removeCommandChannel(channel);
+                removeCommandChannel(ctx, guildConfig, channel);
                 break;
             case "clear":
-                guildConfig.commandChannelIds = null;
+                clearCommandChannels(ctx, guildConfig);
                 break;
             case "show":
-                showAllowedCommandChannels(ctx, guildConfig);
-                return;
+                showCommandChannels(ctx, guildConfig);
+                break;
             default:
-                ctx.replyWarning("Unrecognized list action provided!");
-                return;
+                throw new IndexOutOfBoundsException();
         }
+    }
+
+    private void addCommandChannel(CommandContext ctx, GuildConfig guildConfig, TextChannel channel) {
+        int oldSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
+        guildConfig.addCommandChannel(channel);
+        int newSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
         try {
             DiscordAudioStreamBot.getInstance().saveConfig();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        ctx.replySuccess("Allowed command channel list updated.");
+        if (newSize != oldSize) {
+            try {
+                DiscordAudioStreamBot.getInstance().saveConfig();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            ctx.replySuccess("Bindings updated.");
+        } else {
+            ctx.replyWarning("Channel is already bound.");
+        }
     }
 
-    private void showAllowedCommandChannels(CommandContext ctx, GuildConfig guildConfig) {
+    private void removeCommandChannel(CommandContext ctx, GuildConfig guildConfig, TextChannel channel) {
+        int oldSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
+        guildConfig.removeCommandChannel(channel);
+        int newSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
+        if (newSize != oldSize) {
+            try {
+                DiscordAudioStreamBot.getInstance().saveConfig();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            ctx.replySuccess("Bindings updated.");
+        }
+        if (oldSize >= 0 && newSize < 0) {
+            ctx.replyWarning("Last channel has been unbound - commands from any channel will be accepted.");
+        }
+    }
+
+    private void clearCommandChannels(CommandContext ctx, GuildConfig guildConfig) {
+        guildConfig.commandChannelIds = null;
+        try {
+            DiscordAudioStreamBot.getInstance().saveConfig();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        ctx.replySuccess("All bindings cleared - commands from any channel will be accepted.");
+    }
+
+    private void showCommandChannels(CommandContext ctx, GuildConfig guildConfig) {
         if (guildConfig.commandChannelIds != null) {
             if (guildConfig.commandChannelIds.size() == 1) {
-                String channelId = guildConfig.commandChannelIds.get(0);
+                String channelId = guildConfig.commandChannelIds.iterator().next();
                 String commandChannelNameStr = formatTextChannelById(ctx.getJDA(), channelId);
-                ctx.replySuccess("Current allowed command channel: " + commandChannelNameStr);
+                ctx.replySuccess("Current command channel: " + commandChannelNameStr);
             } else {
                 String commandChannelNamesStr = guildConfig.commandChannelIds
                         .stream()
                         .map(channelId -> formatTextChannelById(ctx.getJDA(), channelId))
                         .collect(Collectors.joining("\n- "));
-                ctx.replySuccess("Current allowed command channels:\n- " + commandChannelNamesStr);
+                ctx.replySuccess("Current command channels:\n- " + commandChannelNamesStr);
             }
         } else {
-            ctx.replySuccess("No allowed command channels are currently set. Commands can be written in any text channel.");
+            ctx.replySuccess("No bindings set - commands from any channel will be accepted.");
         }
     }
 

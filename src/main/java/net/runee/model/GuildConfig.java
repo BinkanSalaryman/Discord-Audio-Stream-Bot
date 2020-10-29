@@ -4,12 +4,14 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GuildConfig {
     public String guildId;
     public String commandPrefix;
-    public List<String> commandChannelIds;
+    public Set<String> commandChannelIds;
 
     public GuildConfig() {
 
@@ -23,13 +25,13 @@ public class GuildConfig {
         this.guildId = copy.guildId;
         this.commandPrefix = copy.commandPrefix;
         if(copy.commandChannelIds != null) {
-            this.commandChannelIds = new ArrayList<>(copy.commandChannelIds);
+            this.commandChannelIds = new HashSet<>(copy.commandChannelIds);
         }
     }
 
     public void addCommandChannel(MessageChannel channel) {
         if(commandChannelIds == null) {
-            commandChannelIds = new ArrayList<>();
+            commandChannelIds = new HashSet<>();
         }
         commandChannelIds.add(channel.getId());
     }
@@ -37,6 +39,9 @@ public class GuildConfig {
     public void removeCommandChannel(MessageChannel channel) {
         if(commandChannelIds != null) {
             commandChannelIds.remove(channel.getId());
+            if(commandChannelIds.isEmpty()) {
+                commandChannelIds = null;
+            }
         }
     }
 

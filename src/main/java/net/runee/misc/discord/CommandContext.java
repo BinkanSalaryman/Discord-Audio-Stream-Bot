@@ -2,10 +2,12 @@ package net.runee.misc.discord;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.runee.errors.CommandException;
 import net.runee.errors.GuildContextRequiredException;
+import net.runee.errors.InsufficientPermissionsException;
 import net.runee.misc.Utils;
 import net.runee.misc.logging.Logger;
 
@@ -115,5 +117,24 @@ public class CommandContext {
             throw new GuildContextRequiredException(command, this);
         }
         return guild;
+    }
+
+    public Guild ensureAdminPermission() throws InsufficientPermissionsException, GuildContextRequiredException {
+        ensureGuildContext();
+        Member author = guild.getMember(this.author);
+        if(author == null) {
+            throw new RuntimeException("Failed to get your guild member info");
+        }
+        if(!author.hasPermission(Permission.ADMINISTRATOR)) {
+            throw new InsufficientPermissionsException(command, this);
+        }
+        return guild;
+    }
+
+    public void ensureOwnerPermission() throws InsufficientPermissionsException {
+        ApplicationInfo appInfo = jda.retrieveApplicationInfo().complete();
+        if(!author.equals(appInfo.getOwner())) {
+            throw new InsufficientPermissionsException(command, this);
+        }
     }
 }

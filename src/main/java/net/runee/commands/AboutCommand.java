@@ -11,7 +11,7 @@ import net.runee.misc.discord.CommandContext;
 public class AboutCommand extends Command {
     public AboutCommand() {
         this.name = "about";
-        this.help = "Shows information about this software.";
+        this.summary = "Shows information about this software.";
     }
 
     @Override
