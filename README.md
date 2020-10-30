@@ -16,6 +16,10 @@
 4. Audio target (e.g. you, audio recording software)
 
 #### You are the host
+1. Create an application on the developer portal
+2. Create a bot user
+3. Copy the token
+4. Enable required intents
 ![bot application page](https://i.imgur.com/QYbZLfn.png)
 
 
