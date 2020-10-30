@@ -6,12 +6,13 @@
 2. Recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
 3. Discord Audio Stream Bot (This Software)
 4. Discord Voice Chat (Discord)
+
+![preview](https://i.imgur.com/diLmICq.png)
+
 #### Streaming from discord ("listening")
 1. Discord Voice Chat (Discord)
 2. Discord Audio Stream Bot (This Software)
 3. Output device (e.g. your speakers, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
-
-![preview](https://i.imgur.com/diLmICq.png)
 
 #### You are the host
 ![bot application page](https://i.imgur.com/QYbZLfn.png)
