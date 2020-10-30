@@ -10,7 +10,7 @@
 ![preview](https://i.imgur.com/lODMwHI.png)
 
 ## Instructions
-* Create an application with a bot user [here](https://discordapp.com/developers/applications). In the bot tab, copy the bot token and enable the "SERVER MEMBERS INTENT" (required to check a user issuing a command has sufficient permissions)
+* Create an application with a bot user [here](https://discordapp.com/developers/applications). In the bot tab, copy the bot token and enable the "SERVER MEMBERS INTENT" (required to check if a user issuing a command has sufficient permissions)
 * Run the bot program using **run win64.bat** or **run win32.bat** (depending on your PC's architecture; in case one doesn't work, please try the other one!)
 * In the settings tab, paste your bot token
 * In the home tab, click the big on/off button to log in to the bot user
