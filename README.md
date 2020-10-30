@@ -7,7 +7,9 @@
 * 3. Discord Audio Stream Bot (This Software)
 * 4. Discord Voice Chat (Discord)
 
-![preview](https://i.imgur.com/lODMwHI.png)
+![preview](https://i.imgur.com/diLmICq.png)
+
+![bot application page](https://i.imgur.com/QYbZLfn.png)
 
 ## Instructions
 * Create an application with a bot user [here](https://discordapp.com/developers/applications). In the bot tab, copy the bot token and enable the "SERVER MEMBERS INTENT" (required to check if a user issuing a command has sufficient permissions)
@@ -22,7 +24,7 @@
 
 ## Binaries
 #### Downloads
->[Latest build (2020-10-29)](https://drive.google.com/uc?export=download&id=0B6898q95NTM3eGxoSVljMlM3ekk) (yyyy-MM-dd)
+>[Latest build (2020-10-30)](https://drive.google.com/uc?export=download&id=0B6898q95NTM3eGxoSVljMlM3ekk) (yyyy-MM-dd)
 
 #### Tools
 * >[Virtual Cable](https://www.vb-audio.com/Cable/index.htm) (A virtual audio device working as virtual audio cable - After installation, restart bot program and set the recording device in settings tab to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or else you'll hear nothing)
