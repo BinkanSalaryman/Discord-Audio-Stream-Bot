@@ -1,6 +1,7 @@
 # Discord Audio Stream Bot
 >A simple discord audio streaming bot.
 
+
 #### Streaming to discord - "speaking"
 1. Audio source (e.g. your voice, music from file, sound from game)
 2. Recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
@@ -9,17 +10,20 @@
 
 ![preview](https://i.imgur.com/diLmICq.png)
 
+
 #### Streaming from discord - "listening"
 1. Discord Voice Chat (discord)
 2. Discord Audio Stream Bot (this software)
 3. Output device (e.g. your speakers, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
 4. Audio target (e.g. you, audio recording software)
 
+
 #### You are the host
 1. Create an application on the developer portal
 2. Create a bot user
 3. Copy the token
 4. Enable required intents
+
 ![bot application page](https://i.imgur.com/QYbZLfn.png)
 
 
