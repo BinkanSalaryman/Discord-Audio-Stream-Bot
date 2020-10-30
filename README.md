@@ -1,13 +1,12 @@
 # Discord Audio Stream Bot
 >A simple discord audio streaming bot.
 
-#### The audio stream
-**"speaking":**
+#### Streaming to discord ("speaking")
 1. Audio source (e.g. your voice, music from file, sound from game)
 2. Recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
 3. Discord Audio Stream Bot (This Software)
 4. Discord Voice Chat (Discord)
-**"listening:"**
+#### Streaming from discord ("listening")
 1. Discord Voice Chat (Discord)
 2. Discord Audio Stream Bot (This Software)
 3. Output device (e.g. your speakers, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
