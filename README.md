@@ -1,17 +1,24 @@
 # Discord Audio Stream Bot
 >A simple discord audio streaming bot.
 
-#### The way the audio flows
-* 1. Audio source (e.g. your voice, music from file, sound from game)
-* 2. Audio recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
-* 3. Discord Audio Stream Bot (This Software)
-* 4. Discord Voice Chat (Discord)
+#### The audio stream
+**"speaking":**
+1. Audio source (e.g. your voice, music from file, sound from game)
+2. Recording device (e.g. microphone, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
+3. Discord Audio Stream Bot (This Software)
+4. Discord Voice Chat (Discord)
+**"listening:"**
+1. Discord Voice Chat (Discord)
+2. Discord Audio Stream Bot (This Software)
+3. Output device (e.g. your speakers, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
 
 ![preview](https://i.imgur.com/diLmICq.png)
 
+#### You are the host
 ![bot application page](https://i.imgur.com/QYbZLfn.png)
 
-## Instructions
+
+## Getting started
 * Create an application with a bot user [here](https://discordapp.com/developers/applications). In the bot tab, copy the bot token and enable the "SERVER MEMBERS INTENT" (required to check if a user issuing a command has sufficient permissions)
 * Run the bot program using **run win64.bat** or **run win32.bat** (depending on your PC's architecture; in case one doesn't work, please try the other one!)
 * In the settings tab, paste your bot token
@@ -22,6 +29,7 @@
 * In the settings tab, enable "speaking" and select a recording device (default one being your microphone, most likely)
 * Now it should be sending audio from the selected recording device to discord. Have a look at the **Binaries>Tools** section below for a few suggestions.
 
+
 ## Binaries
 #### Downloads
 >[Latest build (2020-10-30)](https://drive.google.com/uc?export=download&id=0B6898q95NTM3eGxoSVljMlM3ekk) (yyyy-MM-dd)
@@ -29,6 +37,7 @@
 #### Tools
 * >[Virtual Cable](https://www.vb-audio.com/Cable/index.htm) (A virtual audio device working as virtual audio cable - After installation, restart bot program and set the recording device in settings tab to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or else you'll hear nothing)
 * >[Audio Router](https://github.com/audiorouterdev/audio-router) (To replug your favourite audio source to play into CABLE Input, if it doesn't support switching audio output)
+
 
 ## If you enjoy my work
 Have a chat with me if you feel like it, my username in discord is **敏感サラリーマン#3306**.
