@@ -13,6 +13,7 @@
 1. Discord Voice Chat (Discord)
 2. Discord Audio Stream Bot (This Software)
 3. Output device (e.g. your speakers, [Virtual Cable](https://www.vb-audio.com/Cable/index.htm))
+4. Audio target (e.g. you, audio recording software)
 
 #### You are the host
 ![bot application page](https://i.imgur.com/QYbZLfn.png)
