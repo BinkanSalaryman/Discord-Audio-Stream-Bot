@@ -38,6 +38,40 @@
 * In the settings tab, enable "speaking" and select a recording device (default one being your microphone, most likely)
 * Now it should be sending audio from the selected recording device to discord.
 
+### macOS
+
+#### Building
+
+* Install homebrew if you do not already have it, then:
+  * `brew install gradle`
+  * `gradle build`
+
+#### Usage
+
+* Follow the build steps above, then:
+  * `cd build/distributions`
+  * `tar -xvf Discord-Audio-Stream-Bot-1.0-SNAPSHOT.tar`
+  * `cd Discord-Audio-Stream-Bot-1.0-SNAPSHOT`
+  * `DISCORD_AUDIO_STREAM_BOT_OPTS='-Djava.library.path="/usr/lib:../../../natives/mac/"' ./bin/Discord-Audio-Stream-Bot`
+
+* Create a discord application w/ a bot user:
+  * https://discordapp.com/developers/applications
+    * In the bot tab, copy the bot token and enable the `SERVER MEMBERS INTENT`
+      * This is required to check if a user issuing a command has sufficient permissions.
+
+* In the Java Application:
+  * Add token to `Settings - General - Bot Token`
+  * Check `Speaking Enabled` and pick `Recording Device`
+    * [Loopback](https://rogueamoeba.com/loopback/) is a very good virtual audio cable application for macOS
+  * Click `Home - Status` button to connect to Discord.
+
+* In Discord:
+  * `@bot prefix set .`
+  * `.bind "my-admin-text-channel"`
+  * `.help`
+  * `.autojoin set "my-voice-channel"`
+  * `.join`
+  * `.activity playing "background music for the channel."`
 
 ## Downloads
 >[Latest build (2020-10-30)](https://drive.google.com/uc?export=download&id=0B6898q95NTM3eGxoSVljMlM3ekk) (yyyy-MM-dd)
