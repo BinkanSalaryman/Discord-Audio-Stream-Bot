@@ -28,7 +28,7 @@ public class LeaveVoiceCommand extends Command {
         switch (args.length) {
             case 0: {
                 // leave automatically
-                guild = ctx.ensureAdminPermission();
+                guild = ctx.ensureAdminOrOwnerPermission();
                 break;
             }
             case 1: {
@@ -45,7 +45,7 @@ public class LeaveVoiceCommand extends Command {
                         if (authorAsMember == null) {
                             ctx.ensureOwnerPermission();
                         } else {
-                            guild = ctx.ensureAdminPermission();
+                            guild = ctx.ensureAdminOrOwnerPermission();
                         }
                         break;
                     }

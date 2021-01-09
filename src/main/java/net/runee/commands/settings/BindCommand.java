@@ -1,18 +1,17 @@
-package net.runee.commands;
+package net.runee.commands.settings;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.runee.DiscordAudioStreamBot;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +20,7 @@ public class BindCommand extends Command {
         this.name = "bind";
         this.arguments = "action:add|remove|clear|show [channel]";
         this.summary = "Manages which channels to accept commands from.";
+        this.category = CommandCategory.SETTINGS;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class BindCommand extends Command {
             case "add":
             case "remove":
             case "clear":
-                ctx.ensureAdminPermission();
+                ctx.ensureAdminOrOwnerPermission();
                 break;
         }
 

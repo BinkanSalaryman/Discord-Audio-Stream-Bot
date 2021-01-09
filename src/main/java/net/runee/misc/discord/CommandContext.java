@@ -119,21 +119,32 @@ public class CommandContext {
         return guild;
     }
 
-    public Guild ensureAdminPermission() throws InsufficientPermissionsException, GuildContextRequiredException {
-        ensureGuildContext();
+    public boolean isOwner() {
+        ApplicationInfo appInfo = jda.retrieveApplicationInfo().complete();
+        return author.equals(appInfo.getOwner());
+    }
+
+    public boolean isAdmin() {
+        if(guild == null) {
+            return false;
+        }
         Member author = guild.getMember(this.author);
         if(author == null) {
             throw new RuntimeException("Failed to get your guild member info");
         }
-        if(!author.hasPermission(Permission.ADMINISTRATOR)) {
-            throw new InsufficientPermissionsException(command, this);
+        return author.hasPermission(Permission.ADMINISTRATOR);
+    }
+
+    public Guild ensureAdminOrOwnerPermission() throws InsufficientPermissionsException, GuildContextRequiredException {
+        ensureGuildContext();
+        if(!isAdmin()) {
+            ensureOwnerPermission();
         }
         return guild;
     }
 
     public void ensureOwnerPermission() throws InsufficientPermissionsException {
-        ApplicationInfo appInfo = jda.retrieveApplicationInfo().complete();
-        if(!author.equals(appInfo.getOwner())) {
+        if(!isOwner()) {
             throw new InsufficientPermissionsException(command, this);
         }
     }

@@ -1,21 +1,20 @@
-package net.runee.commands;
+package net.runee.commands.settings;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.runee.DiscordAudioStreamBot;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
-
-import java.io.IOException;
 
 public class PrefixCommand extends Command {
     public PrefixCommand() {
         this.name = "prefix";
         this.arguments = "action:set|clear|show [prefix]";
         this.summary = "Get or set current servers' command prefix.";
+        this.category = CommandCategory.SETTINGS;
     }
 
     @Override
@@ -69,7 +68,7 @@ public class PrefixCommand extends Command {
     }
 
     private void setPrefix(CommandContext ctx, String prefix) throws CommandException {
-        final Guild guild = ctx.ensureAdminPermission();
+        final Guild guild = ctx.ensureAdminOrOwnerPermission();
         final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
         if (guildConfig != null) {

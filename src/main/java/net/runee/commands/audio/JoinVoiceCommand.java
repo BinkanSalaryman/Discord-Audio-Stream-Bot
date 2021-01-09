@@ -25,7 +25,7 @@ public class JoinVoiceCommand extends Command {
     @Override
     public void execute(CommandContext ctx, String... args) throws CommandException {
         // parse args
-        final Guild guild = ctx.ensureAdminPermission();
+        final Guild guild = ctx.ensureAdminOrOwnerPermission();
         VoiceChannel channel;
         switch (args.length) {
             case 0: {
