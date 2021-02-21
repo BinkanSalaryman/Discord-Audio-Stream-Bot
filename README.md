@@ -67,7 +67,7 @@
 
 * In Discord:
   * `@bot prefix set .`
-  * `.bind "my-admin-text-channel"`
+  * `.bind add "my-admin-text-channel"`
   * `.help`
   * `.autojoin set "my-voice-channel"`
   * `.join`
@@ -80,12 +80,5 @@
 * >[Virtual Cable](https://www.vb-audio.com/Cable/index.htm) (A virtual audio device working as virtual audio cable - After installation, restart bot program and set the recording device in settings tab to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or else you'll hear nothing)
 * >[Audio Router](https://github.com/audiorouterdev/audio-router) (To replug your favourite audio source to play into CABLE Input, if it doesn't support switching audio output)
 
-
-## Have a seat
-If there is something to talk about - my discord username is **敏感サラリーマン#3306**.
-
-![flag_US](https://i.imgur.com/ohuanEH.png) Hi, since I'm not a native english speaker, please bare with me if I do mindless/subconscious grammar mistakes or the like. If you are going to contact me for a problem, I expect you to have fully read & understood this README.<p>
-![flag_DE](https://i.imgur.com/ZwReBfl.png) Hallo, wenn du magst können wir auf Deutsch kommunizieren. Solltest du mich wegen eines Problems anschreiben, erwarte ich aber zumindest dass du das README durchgelesen und verstanden hast<p>
-![flag_JP](https://i.imgur.com/hCrtRjG.png) こんばんは。日本語はちょっとだけ身につけましたけれど、ドイツの出身ですから辛抱してね。問題について連絡しようとするまえにぜひこのREADME（説明書）を全的に読んでください。config.jsonというファイルをメモ帳で編集する必要ないです！それは過去のソフトバンの方法です。<p>
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://goo.gl/x3BXFW)
