@@ -212,7 +212,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         final GuildConfig guildConfig = config.getGuildConfig(e.getGuild());
 
         List<String> prefixes = new ArrayList<>();
-        if (guildConfig != null && guildConfig.commandPrefix != null) {
+        if (guildConfig.commandPrefix != null) {
             prefixes.add(guildConfig.commandPrefix);
         }
         prefixes.add("<@" + jda.getSelfUser().getId() + ">");
@@ -232,7 +232,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
         if (e.getChannel() instanceof GuildChannel) {
             final GuildConfig guildConfig = config.getGuildConfig(e.getGuild());
-            if (guildConfig != null && !guildConfig.isCommandChannel(e.getChannel())) {
+            if (!guildConfig.isCommandChannel(e.getChannel())) {
                 if (e.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE)) {
                     e.getMessage().delete().queue();
                 }

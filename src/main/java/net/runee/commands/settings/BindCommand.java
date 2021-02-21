@@ -81,10 +81,6 @@ public class BindCommand extends Command {
         // execute
         final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
-        if (guildConfig == null) {
-            guildConfig = new GuildConfig(guild);
-            config.addGuildConfig(guildConfig);
-        }
         switch (action) {
             case "add":
                 addCommandChannel(ctx, guildConfig, channel);

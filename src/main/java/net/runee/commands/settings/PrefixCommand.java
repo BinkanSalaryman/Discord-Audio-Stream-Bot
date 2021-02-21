@@ -60,7 +60,7 @@ public class PrefixCommand extends Command {
     private void showPrefix(CommandContext ctx) throws CommandException {
         final Guild guild = ctx.ensureGuildContext();
         GuildConfig guildConfig = getConfig().getGuildConfig(guild);
-        if (guildConfig != null && guildConfig.commandPrefix != null) {
+        if (guildConfig.commandPrefix != null) {
             ctx.replySuccess("Current command prefix: `" + guildConfig.commandPrefix + "`.");
         } else {
             ctx.replySuccess("No command prefix is currently set.");
@@ -71,13 +71,7 @@ public class PrefixCommand extends Command {
         final Guild guild = ctx.ensureAdminOrOwnerPermission();
         final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
-        if (guildConfig != null) {
-            guildConfig.commandPrefix = prefix;
-        } else {
-            guildConfig = new GuildConfig(guild);
-            guildConfig.commandPrefix = prefix;
-            config.addGuildConfig(guildConfig);
-        }
+        guildConfig.commandPrefix = prefix;
         saveConfig();
         if (prefix != null) {
             ctx.replySuccess("Command prefix updated.");

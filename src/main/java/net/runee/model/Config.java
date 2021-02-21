@@ -43,10 +43,7 @@ public class Config {
     }
 
     public GuildConfig getGuildConfig(Guild guild) {
-        if(guild == null) {
-            return null;
-        }
-        if(guildConfigs != null) {
+        if(guild != null && guildConfigs != null) {
             for (GuildConfig guildConfig : guildConfigs) {
                 if (guildConfig == null) {
                     continue; // what?
@@ -56,17 +53,15 @@ public class Config {
                 }
             }
         }
-        return null;
+        GuildConfig result = new GuildConfig(guild);
+        if(guildConfigs == null) {
+            guildConfigs = new ArrayList<>();
+        }
+        guildConfigs.add(result);
+        return result;
     }
 
     public boolean getClearLogOnStart() {
         return clearLogOnStart != null ? clearLogOnStart : true;
-    }
-
-    public void addGuildConfig(GuildConfig guildConfig) {
-        if(guildConfigs == null) {
-            guildConfigs = new ArrayList<>();
-        }
-        guildConfigs.add(guildConfig);
     }
 }

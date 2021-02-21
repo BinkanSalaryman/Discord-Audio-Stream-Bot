@@ -90,7 +90,7 @@ public class AutoJoinVoiceCommand extends Command {
     }
 
     private void showAutoVoiceChannel(CommandContext ctx, GuildConfig guildConfig) {
-        if (guildConfig != null && guildConfig.autoJoinVoiceChanncelId != null) {
+        if (guildConfig.autoJoinVoiceChanncelId != null) {
             ctx.replySuccess("Current auto-join voice channel: `" + formatVoiceChannelById(ctx.getJDA(), guildConfig.autoJoinVoiceChanncelId) + "`.");
         } else {
             ctx.replySuccess("No auto-join voice channel is currently set.");
