@@ -1,4 +1,4 @@
-package net.runee.commands.audio;
+package net.runee.commands.botuser;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -16,10 +16,8 @@ import java.util.List;
 
 public class JoinVoiceCommand extends Command {
     public JoinVoiceCommand() {
-        this.name = "join";
-        this.arguments = "[channel]";
-        this.summary = "Joins a voice channel.";
-        this.category = CommandCategory.AUDIO;
+        super("join", "Joins a voice channel.", CommandCategory.BOT_USER);
+        this.arguments.add(new Argument("channel", "Voice channel in question", "VoiceChannel", true));
     }
 
     @Override

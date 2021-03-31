@@ -1,16 +1,16 @@
-package net.runee.commands;
+package net.runee.commands.botuser;
 
 import net.dv8tion.jda.api.entities.Activity;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 
 public class ActivityCommand extends Command {
     public ActivityCommand() {
-        this.name = "activity";
-        this.arguments = "activity:playing|streaming|listening|watching text [url]";
-        this.summary = "Manages the bot users' activity.";
+        super("activity", "Manages the bot users' activity.", CommandCategory.BOT_USER);
+        this.arguments.add(new Argument("activity", "The new bot user's activity", "playing|streaming|listening|watching"));
     }
 
     @Override

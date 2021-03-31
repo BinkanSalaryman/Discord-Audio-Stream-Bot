@@ -1,4 +1,4 @@
-package net.runee.commands.audio;
+package net.runee.commands.botuser;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -15,10 +15,8 @@ import java.util.List;
 
 public class LeaveVoiceCommand extends Command {
     public LeaveVoiceCommand() {
-        this.name = "leave";
-        this.arguments = "[guild]";
-        this.summary = "Leaves from a guild voice instance.";
-        this.category = CommandCategory.AUDIO;
+        super("leave", "Leaves from a guild voice instance.", CommandCategory.BOT_USER);
+        this.arguments.add(new Argument("guild", "Guild instance in question", "Guild", true));
     }
 
     @Override
@@ -37,7 +35,7 @@ public class LeaveVoiceCommand extends Command {
                 List<Guild> guildMatches = Utils.findGuild(ctx.getJDA(), guildSearch);
                 switch (guildMatches.size()) {
                     case 0:
-                        ctx.replyWarning("No such server!");
+                        ctx.replyWarning("No such guild!");
                         return;
                     case 1: {
                         guild = guildMatches.get(0);
@@ -50,7 +48,7 @@ public class LeaveVoiceCommand extends Command {
                         break;
                     }
                     default:
-                        ctx.replyWarning("There are multiple servers with that name!");
+                        ctx.replyWarning("There are multiple guilds with that name!");
                         return;
                 }
                 break;

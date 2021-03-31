@@ -1,14 +1,14 @@
-package net.runee.commands;
+package net.runee.commands.bot;
 
 import net.runee.errors.CommandException;
 import net.runee.gui.MainFrame;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 
 public class ExitCommand extends Command {
     public ExitCommand() {
-        this.name = "exit";
-        this.summary = "Terminates the bot program.";
+        super("exit", "Terminates the bot program.", CommandCategory.BOT);
     }
 
     @Override

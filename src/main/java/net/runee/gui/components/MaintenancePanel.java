@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.*;
+import net.dv8tion.jda.api.events.guild.update.GuildUpdateIconEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.runee.DiscordAudioStreamBot;
 import net.runee.gui.renderer.GuildListCellRenderer;
@@ -46,21 +47,8 @@ public class MaintenancePanel extends JPanel implements EventListener {
         });
         removeGuild = new JButton("Leave guild");
         removeGuild.addActionListener(e -> {
-            removeGuild.setEnabled(false);
             Guild guild = guilds.getSelectedValue();
-            guild.leave().queue(e2 -> {
-                int index = guilds.getSelectedIndex();
-                guildsModel.removeElementAt(index);
-                if (index == guildsModel.size()) {
-                    index--;
-                }
-                if (index >= 0) {
-                    guilds.setSelectedIndex(index);
-                }
-
-                removeGuild.setEnabled(true);
-                updateGuildControls();
-            });
+            guild.leave().queue();
         });
     }
 
@@ -116,6 +104,19 @@ public class MaintenancePanel extends JPanel implements EventListener {
                 updateGuildControls();
             }
             if(e instanceof GuildLeaveEvent) {
+                guildsModel.removeElement(guild);
+                int index = guilds.getSelectedIndex();
+                if (index == guildsModel.size()) {
+                    index--;
+                }
+                if (index >= 0) {
+                    guilds.setSelectedIndex(index);
+                }
+
+                updateGuildControls();
+                GuildListCellRenderer.getInstance().clearIconCache(guild);
+            }
+            if(e instanceof GuildUpdateIconEvent) {
                 GuildListCellRenderer.getInstance().clearIconCache(guild);
             }
         }

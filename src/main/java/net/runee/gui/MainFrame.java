@@ -164,4 +164,8 @@ public class MainFrame extends JFrame implements Runnable {
         }
         return String.join(" ", words);
     }
+
+    public void onPing(long ping) {
+        tabHome.onPing(ping);
+    }
 }

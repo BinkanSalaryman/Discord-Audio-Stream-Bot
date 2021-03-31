@@ -1,4 +1,4 @@
-package net.runee.commands;
+package net.runee.commands.bot;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -12,8 +12,7 @@ import net.runee.misc.discord.CommandContext;
 
 public class InviteCommand extends Command {
     public InviteCommand() {
-        this.name = "invite";
-        this.summary = "Shows this bot's invite link.";
+        super("invite", "Shows this bot's invite link.", CommandCategory.BOT);
     }
 
     @Override
@@ -26,7 +25,7 @@ public class InviteCommand extends Command {
         // execute
         ctx.reply(new EmbedBuilder()
                 .setTitle("Authorize access to your account", DiscordAudioStreamBot.getInstance().getJDA().getInviteUrl(Permission.EMPTY_PERMISSIONS))
-                .setDescription("Wanna invite me to your server?")
+                .setDescription("Wanna invite me to your guild?")
                 .setColor(Utils.colorYellow)
                 .build()
         );

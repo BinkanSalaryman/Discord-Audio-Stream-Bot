@@ -1,4 +1,4 @@
-package net.runee.commands.audio;
+package net.runee.commands.botuser;
 
 import net.runee.DiscordAudioStreamBot;
 import net.runee.errors.CommandException;
@@ -9,9 +9,7 @@ import net.runee.misc.discord.CommandContext;
 
 public class LeaveVoiceAllCommand extends Command {
     public LeaveVoiceAllCommand() {
-        this.name = "leave-all";
-        this.summary = "Leaves from all server voice instances.";
-        this.category = CommandCategory.AUDIO;
+        super("leave-all", "Leaves from all guild voice instances.", CommandCategory.BOT_USER);
     }
 
     @Override

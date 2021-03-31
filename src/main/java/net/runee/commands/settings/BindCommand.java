@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
 
 public class BindCommand extends Command {
     public BindCommand() {
-        this.name = "bind";
-        this.arguments = "action:add|remove|clear|show [channel]";
-        this.summary = "Manages which channels to accept commands from.";
-        this.category = CommandCategory.SETTINGS;
+        super("bind", "Manages which channels to accept commands from.", CommandCategory.SETTINGS);
+        this.arguments.add(new Argument("op", "Operation to perform", "add|remove|clear|show"));
+        this.arguments.add(new Argument("channel", "Channel to add/remove to list of accepted command channels. Only valid if op = 'add' or 'remove'", "TextChannel", true));
     }
 
     @Override
@@ -134,12 +133,11 @@ public class BindCommand extends Command {
         if (guildConfig.commandChannelIds != null) {
             if (guildConfig.commandChannelIds.size() == 1) {
                 String channelId = guildConfig.commandChannelIds.iterator().next();
-                String commandChannelNameStr = "`" + formatTextChannelById(ctx.getJDA(), channelId) + "`";
-                ctx.replySuccess("Current command channel: " + commandChannelNameStr);
+                ctx.replySuccess("Current command channel: " + formatChannel(ctx, channelId));
             } else {
                 String commandChannelNamesStr = guildConfig.commandChannelIds
                         .stream()
-                        .map(channelId -> "`" + formatTextChannelById(ctx.getJDA(), channelId) + "`")
+                        .map(channelId -> "`" + formatChannel(ctx, channelId))
                         .collect(Collectors.joining("\n" + Utils.ucListItem));
                 ctx.replySuccess("Current command channels:\n" + Utils.ucListItem + commandChannelNamesStr);
             }
@@ -148,8 +146,8 @@ public class BindCommand extends Command {
         }
     }
 
-    private String formatTextChannelById(JDA jda, String id) {
-        TextChannel channel = jda.getTextChannelById(id);
-        return channel != null ? channel.getName() : id;
+    private String formatChannel(CommandContext ctx, String channelId) {
+        TextChannel channel = ctx.getJDA().getTextChannelById(channelId);
+        return "`" + (channel != null ? Utils.formatChannel(channel) : channelId) + "`";
     }
 }

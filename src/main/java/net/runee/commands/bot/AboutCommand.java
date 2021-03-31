@@ -1,4 +1,4 @@
-package net.runee.commands;
+package net.runee.commands.bot;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.runee.DiscordAudioStreamBot;
@@ -6,12 +6,12 @@ import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 
 public class AboutCommand extends Command {
     public AboutCommand() {
-        this.name = "about";
-        this.summary = "Shows information about this software.";
+        super("about", "Shows information about this software.", CommandCategory.BOT);
     }
 
     @Override

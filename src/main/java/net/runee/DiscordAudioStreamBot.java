@@ -11,22 +11,24 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
+import net.dv8tion.jda.api.events.channel.voice.update.VoiceChannelUpdatePositionEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.entities.DataMessage;
-import net.runee.commands.*;
-import net.runee.commands.audio.AutoJoinVoiceCommand;
-import net.runee.commands.audio.JoinVoiceCommand;
-import net.runee.commands.audio.LeaveVoiceAllCommand;
-import net.runee.commands.audio.LeaveVoiceCommand;
-import net.runee.commands.ActivityCommand;
+import net.runee.commands.botuser.*;
+import net.runee.commands.settings.AutoJoinVoiceCommand;
+import net.runee.commands.bot.*;
 import net.runee.commands.settings.BindCommand;
+import net.runee.commands.settings.FollowVoiceCommand;
 import net.runee.commands.settings.PrefixCommand;
-import net.runee.commands.StatusCommand;
-import net.runee.commands.InviteCommand;
 import net.runee.errors.BassException;
+import net.runee.gui.MainFrame;
+import net.runee.gui.components.HomePanel;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
 import net.runee.misc.discord.CommandContext;
@@ -36,6 +38,7 @@ import net.runee.model.GuildConfig;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +116,8 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         )
                 .addEventListeners(this)
                 .setEnableShutdownHook(false)
-                .build();
+                .build()
+        ;
     }
 
     public void logoff() {
@@ -134,24 +138,24 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     public List<Command> getCommands() {
         if (commands == null) {
             commands = new ArrayList<>(Arrays.asList(
-                    // general
+                    // bot
                     new AboutCommand(),
-                    new BindCommand(),
+                    new ExitCommand(),
                     new HelpCommand(),
                     new InviteCommand(),
-                    new PrefixCommand(),
-                    new ExitCommand(),
                     new StopCommand(),
-                    new StatusCommand(),
+                    // bot user
                     new ActivityCommand(),
-                    // audio
                     new JoinVoiceCommand(),
-                    new LeaveVoiceCommand(),
+                    new LeaveGuildCommand(),
                     new LeaveVoiceAllCommand(),
-                    new AutoJoinVoiceCommand()
-                    // tools
-                    //new MessageCommand(),
-                    //new TestCommand(),
+                    new LeaveVoiceCommand(),
+                    new StatusCommand(),
+                    // settings
+                    new AutoJoinVoiceCommand(),
+                    new BindCommand(),
+                    new FollowVoiceCommand(),
+                    new PrefixCommand()
             ));
         }
         return commands;
@@ -159,26 +163,79 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     @Override
     public void onReady(@Nonnull ReadyEvent e) {
+        autoJoin();
+    }
+
+    private void autoJoin() {
         for (GuildConfig guildConfig : Utils.nullListToEmpty(getConfig().guildConfigs)) {
-            if (guildConfig.autoJoinVoiceChanncelId != null) {
-                Guild guild = jda.getGuildById(guildConfig.guildId);
-                if (guild == null) {
-                    logger.warn("Failed to retrieve guild with id '" + guildConfig.guildId + "' to auto-join voice");
-                    continue;
+            for (int step = 0; true; step++) {
+                switch (step) {
+                    case 0:
+                        if(guildConfig.followedUserId != null) {
+                            Guild guild = jda.getGuildById(guildConfig.guildId);
+                            if (guild == null) {
+                                logger.warn("Failed to retrieve guild with id '" + guildConfig.guildId + "' to follow voice");
+                                continue;
+                            }
+                            Member target = guild.getMemberById(guildConfig.followedUserId);
+                            if (target == null) {
+                                logger.warn("User with id '" + guildConfig.followedUserId + "' not found in guild " + guild.getName());
+                                continue;
+                            }
+                            VoiceChannel target_channel = target.getVoiceState().getChannel();
+                            if (target_channel != null) {
+                                joinVoice(target_channel);
+                                return;
+                            }
+                        }
+                        continue;
+                    case 1:
+                        if (guildConfig.autoJoinVoiceChanncelId != null) {
+                            Guild guild = jda.getGuildById(guildConfig.guildId);
+                            if (guild == null) {
+                                logger.warn("Failed to retrieve guild with id '" + guildConfig.guildId + "' to auto-join voice");
+                                continue;
+                            }
+                            VoiceChannel channel = guild.getVoiceChannelById(guildConfig.autoJoinVoiceChanncelId);
+                            if (channel == null) {
+                                logger.warn("Voice channel with id '" + guildConfig.autoJoinVoiceChanncelId + "' not found in guild " + guild.getName());
+                                continue;
+                            }
+                            joinVoice(channel);
+                            return;
+                        }
+                        continue;
+                    default:
+                        return;
                 }
-                VoiceChannel channel = guild.getVoiceChannelById(guildConfig.autoJoinVoiceChanncelId);
-                if (channel == null) {
-                    logger.warn("Voice channel with id '" + guildConfig.autoJoinVoiceChanncelId + "' not found in guild " + guild.getName() + ", removing...");
-                    try {
-                        saveConfig();
-                    } catch (IOException ex) {
-                        logger.warn("Failed to save config", ex);
-                    }
-                    continue;
-                }
-                joinVoice(channel);
             }
         }
+    }
+
+    @Override
+    public void onGuildVoiceJoin(@Nonnull GuildVoiceJoinEvent event) {
+        if(isFollowedVoiceTarget(event.getMember())) {
+            joinVoice(event.getChannelJoined());
+        }
+    }
+
+    @Override
+    public void onGuildVoiceMove(@Nonnull GuildVoiceMoveEvent event) {
+        if(isFollowedVoiceTarget(event.getMember())) {
+            joinVoice(event.getChannelJoined());
+        }
+    }
+
+    @Override
+    public void onGuildVoiceLeave(@Nonnull GuildVoiceLeaveEvent event) {
+        if(isFollowedVoiceTarget(event.getMember())) {
+            leaveVoice(event.getGuild());
+        }
+    }
+
+    private boolean isFollowedVoiceTarget(Member member) {
+        GuildConfig guildConfig = getConfig().getGuildConfig(member.getGuild());
+        return guildConfig.followedUserId != null && Objects.equals(member.getId(), guildConfig.followedUserId);
     }
 
     @Override
@@ -290,7 +347,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         audioManager.setConnectionListener(new ConnectionListener() {
             @Override
             public void onPing(long ping) {
-
+                EventQueue.invokeLater(() -> MainFrame.getInstance().onPing(ping));
             }
 
             @Override
@@ -352,7 +409,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
             }
             if (sendingHandler instanceof SpeakHandler) {
                 try {
-                    ((SpeakHandler) sendingHandler).openRecordingDevice(Utils.getRecordingDeviceHandle(recordingDevice));
+                    ((SpeakHandler) sendingHandler).openRecordingDevice(Utils.getRecordingDeviceHandle(recordingDevice), audioManager.isConnected());
                 } catch (BassException ex) {
                     logger.error("Failed to open recording device '" + recordingDevice + "'", ex);
                     sendingHandler = null;

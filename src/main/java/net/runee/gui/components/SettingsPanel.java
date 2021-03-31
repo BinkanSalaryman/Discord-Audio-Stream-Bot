@@ -14,6 +14,7 @@ import net.runee.gui.listitems.RecordingDeviceItem;
 import net.runee.model.Config;
 
 import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -23,8 +24,8 @@ public class SettingsPanel extends JPanel {
     private JCheckBox clearLogOnStart;
 
     // audio
-    private JCheckBox speakEnabled;
-    private JCheckBox listenEnabled;
+    private JButton speakEnabled;
+    private JButton listenEnabled;
     private JList<RecordingDeviceItem> recordingDevices;
     private JList<PlaybackDeviceItem> playbackDevices;
 
@@ -50,20 +51,20 @@ public class SettingsPanel extends JPanel {
         });
 
         // audio
-        speakEnabled = new JCheckBox();
+        speakEnabled = new JButton();
         speakEnabled.addActionListener(e -> {
-            boolean speakEnabled = ((JCheckBox) e.getSource()).isSelected();
-            bot.setSpeakEnabled(speakEnabled);
-            recordingDevices.setEnabled(speakEnabled);
-            DiscordAudioStreamBot.getConfig().speakEnabled = speakEnabled;
+            final Config cfg = DiscordAudioStreamBot.getConfig();
+            cfg.speakEnabled = !cfg.speakEnabled;
+            bot.setSpeakEnabled(cfg.speakEnabled);
+            updateSpeakEnabled();
             saveConfig();
         });
-        listenEnabled = new JCheckBox();
+        listenEnabled = new JButton();
         listenEnabled.addActionListener(e -> {
-            boolean listenEnabled = ((JCheckBox) e.getSource()).isSelected();
-            bot.setListenEnabled(listenEnabled);
-            playbackDevices.setEnabled(listenEnabled);
-            DiscordAudioStreamBot.getConfig().listenEnabled = listenEnabled;
+            final Config cfg = DiscordAudioStreamBot.getConfig();
+            cfg.listenEnabled = !cfg.listenEnabled;
+            bot.setListenEnabled(cfg.listenEnabled);
+            updateListenEnabled();
             saveConfig();
         });
         recordingDevices = new JList<>();
@@ -99,10 +100,11 @@ public class SettingsPanel extends JPanel {
         botToken.setText(Utils.nullToEmptyString(config.botToken));
         clearLogOnStart.setSelected(config.getClearLogOnStart());
 
-        // audio
+        // voice
         speakEnabled.setSelected(config.getSpeakEnabled());
+        updateSpeakEnabled();
         listenEnabled.setSelected(config.getListenEnabled());
-        recordingDevices.setEnabled(speakEnabled.isSelected());
+        updateListenEnabled();
         {
             DefaultListModel<RecordingDeviceItem> model = new DefaultListModel<>();
             //model.addElement(null);
@@ -121,7 +123,6 @@ public class SettingsPanel extends JPanel {
                 }
             }
         }
-        playbackDevices.setEnabled(listenEnabled.isSelected());
         {
             DefaultListModel<PlaybackDeviceItem> model = new DefaultListModel<>();
             //model.addElement(null);
@@ -168,7 +169,8 @@ public class SettingsPanel extends JPanel {
                         .add("c:p") // general
                         .add("c:p", 2)
                         .gapUnrelated().add("c:p")
-                        .add("c:p", 2)
+                        .add("c:p")
+                        .add("t:p")
                         .build()
                 )
                 .columnGroups(new int[]{1, 5}, new int[]{2, 6})
@@ -180,13 +182,13 @@ public class SettingsPanel extends JPanel {
                 .add("Clear log on startup").xy(1, row += 2)
                 /**/.add(clearLogOnStart).xyw(3, row, 5)
                 .addSeparator("Audio").xyw(1, row += 2, 7)
-                .add("Speaking enabled").xy(1, row += 2)
+                .add("Mute/Unmute").xy(1, row += 2)
                 /**/.add(speakEnabled).xy(3, row)
-                /**/.add("Listening enabled").xy(5, row)
+                /**/.add("Deafen/Undeafen").xy(5, row)
                 /**/.add(listenEnabled).xy(7, row)
-                .add("Recording device").xy(1, row += 2)
+                .add("Input device").xy(1, row += 2)
                 /**/.add(recordingDevices).xy(3, row)
-                /**/.add("Playback device").xy(5, row)
+                /**/.add("Output device").xy(5, row)
                 /**/.add(playbackDevices).xy(7, row)
                 .build();
     }
@@ -201,5 +203,25 @@ public class SettingsPanel extends JPanel {
                 botToken.setEnabled(false);
                 break;
         }
+    }
+
+    private void updateSpeakEnabled() {
+        boolean enabled = DiscordAudioStreamBot.getConfig().speakEnabled;
+        ImageIcon icon = Utils.getIcon("icomoon/32px/031-mic.png", 24, true);
+        if(!enabled) {
+            icon = new ImageIcon(Utils.overlayImage((BufferedImage) icon.getImage(), Utils.getIcon("runee/32px/strike-through.png", 24, true).getImage()));
+        }
+        speakEnabled.setIcon(icon);
+        recordingDevices.setEnabled(enabled);
+    }
+
+    private void updateListenEnabled() {
+        boolean enabled = DiscordAudioStreamBot.getConfig().listenEnabled;
+        ImageIcon icon = Utils.getIcon("icomoon/32px/017-headphones.png", 24, true);
+        if(!enabled) {
+            icon = new ImageIcon(Utils.overlayImage((BufferedImage) icon.getImage(), Utils.getIcon("runee/32px/strike-through.png", 24, true).getImage()));
+        }
+        listenEnabled.setIcon(icon);
+        playbackDevices.setEnabled(enabled);
     }
 }

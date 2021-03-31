@@ -1,13 +1,13 @@
-package net.runee.commands;
+package net.runee.commands.bot;
 
 import net.runee.errors.CommandException;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 
 public class StopCommand extends Command {
     public StopCommand() {
-        this.name = "stop";
-        this.summary = "Stops the bot.";
+        super("stop", "Stops the bot.", CommandCategory.BOT);
     }
 
     @Override

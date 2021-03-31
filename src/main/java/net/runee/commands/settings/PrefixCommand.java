@@ -11,10 +11,9 @@ import net.runee.model.GuildConfig;
 
 public class PrefixCommand extends Command {
     public PrefixCommand() {
-        this.name = "prefix";
-        this.arguments = "action:set|clear|show [prefix]";
-        this.summary = "Get or set current servers' command prefix.";
-        this.category = CommandCategory.SETTINGS;
+        super("prefix", "Sets a custom command prefix for convenience.", CommandCategory.SETTINGS);
+        this.arguments.add(new Argument("op", "Operation to perform", "set|clear|show"));
+        this.arguments.add(new Argument("prefix", "The new custom prefix. Only valid if op = 'set'", "User", true));
     }
 
     @Override

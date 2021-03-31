@@ -1,16 +1,16 @@
-package net.runee.commands;
+package net.runee.commands.botuser;
 
 import net.dv8tion.jda.api.OnlineStatus;
 import net.runee.errors.CommandException;
 import net.runee.errors.IncorrectArgCountException;
 import net.runee.misc.discord.Command;
+import net.runee.misc.discord.CommandCategory;
 import net.runee.misc.discord.CommandContext;
 
 public class StatusCommand extends Command {
     public StatusCommand() {
-        this.name = "status";
-        this.arguments = "status:online|idle|dnd|inv";
-        this.summary = "Manages the bot users' online status.";
+        super("status", "Manages the bot users' online status.", CommandCategory.BOT_USER);
+        this.arguments.add(new Argument("status", "The new bot user's online status", "online|idle|dnd|inv"));
     }
 
     @Override

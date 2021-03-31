@@ -19,6 +19,7 @@ public class HomePanel extends JPanel implements EventListener {
     private static final Logger logger = new Logger(HomePanel.class);
     private JLabel loginLabel;
     private JButton loginButton;
+    private JLabel pingLabel;
     private MainFrame mainFrame;
 
     public HomePanel(MainFrame mainFrame) {
@@ -58,20 +59,27 @@ public class HomePanel extends JPanel implements EventListener {
                     break;
             }
         });
+
+        pingLabel = new JLabel("Ping: N/A");
+        pingLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        pingLabel.setFont(pingLabel.getFont().deriveFont(10f));
     }
 
     private void layoutComponents() {
+        int row;
         FormBuilder
                 .create()
 
                 .columns("f:p:g")
                 .rows(SpecBuilder
                         .create()
+                        .add("p")
                         .add("f:p:g")
                         .build()
                 )
                 .panel(this)
-                .add(buildCenterPanel()).xy(1, 1, "c,c")
+                .add(pingLabel).xy(1, row = 1, "r,t")
+                .add(buildCenterPanel()).xy(1, row += 2, "c,c")
                 .build();
     }
 
@@ -126,6 +134,12 @@ public class HomePanel extends JPanel implements EventListener {
                 loginButton.setEnabled(false);
                 break;
         }
+        switch (status) {
+            case CONNECTED:
+                break;
+            default:
+                pingLabel.setText("Ping: N/A");
+        }
         if (!initial) {
             mainFrame.updateLoginStatus(status);
         }
@@ -138,5 +152,9 @@ public class HomePanel extends JPanel implements EventListener {
             words[i] = word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
         }
         return String.join(" ", words);
+    }
+
+    public void onPing(long ping) {
+        pingLabel.setText("Ping: " + ping + " ms");
     }
 }

@@ -13,6 +13,7 @@ public class GuildConfig {
     public String commandPrefix;
     public Set<String> commandChannelIds;
     public String autoJoinVoiceChanncelId;
+    public String followedUserId;
 
     public GuildConfig() {
 

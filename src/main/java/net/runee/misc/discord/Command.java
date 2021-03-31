@@ -1,18 +1,25 @@
 package net.runee.misc.discord;
 
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.runee.DiscordAudioStreamBot;
 import net.runee.errors.CommandException;
 import net.runee.model.Config;
-import net.runee.model.GuildConfig;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class Command {
     protected String name;
-    protected String summary = "";
-    protected String arguments = "";
-    protected CommandCategory category = CommandCategory.GENERAL;
+    protected String summary;
+    protected List<Argument> arguments = new ArrayList<>();
+    protected CommandCategory category;
+
+    public Command(String name, String summary, CommandCategory category) {
+        this.name = name;
+        this.summary = summary;
+        this.category = category;
+    }
 
     public String getName() {
         return name;
@@ -22,8 +29,8 @@ public abstract class Command {
         return summary;
     }
 
-    public String getArguments() {
-        return arguments;
+    public List<Argument> getArguments() {
+        return Collections.unmodifiableList(arguments);
     }
 
     public CommandCategory getCategory() {
@@ -41,6 +48,53 @@ public abstract class Command {
             DiscordAudioStreamBot.saveConfig();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    public static class Argument {
+        private String name;
+        private String summary;
+        private String type;
+        private boolean isOptional;
+
+        public Argument(String name, String summary, String type) {
+            this(name, summary, type, false);
+        }
+
+        public Argument(String name, String summary, String type, boolean isOptional) {
+            this.name = name;
+            this.summary = summary;
+            this.type = type;
+            this.isOptional = isOptional;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getSummary() {
+            return summary;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public boolean isEnum() {
+            return type.contains("|");
+        }
+
+        public String[] getEnumValues() {
+            return type.split("\\|");
+        }
+
+        public boolean isOptional() {
+            return isOptional;
+        }
+
+        @Override
+        public String toString() {
+            return isOptional ? "[" + name + "]" : name;
         }
     }
 }

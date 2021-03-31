@@ -228,6 +228,16 @@ public final class Utils {
         return useMissingIcon ? new ImageIcon(missingIcon(size)) : null;
     }
 
+    public static BufferedImage overlayImage(BufferedImage bbase, Image bovr) {
+        BufferedImage result = new BufferedImage(bbase.getWidth(), bbase.getHeight(), bbase.getType());
+        Graphics2D g = result.createGraphics();
+        g.drawImage(bbase, 0, 0, null);
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(bovr, 0, 0, null);
+        g.dispose();
+        return result;
+    }
+
     public static void guiError(Component parentComponent, String message) {
         JOptionPane.showMessageDialog(parentComponent, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
@@ -367,6 +377,58 @@ public final class Utils {
         }
     }
 
+    public static List<Member> findMember(Guild guild, String search) {
+        for (int step = 0; true; step++) {
+            switch (step) {
+                case 0: {
+                    Long userId = Utils.tryParseLong(search);
+                    if (userId == null) {
+                        if(search.endsWith(">")) {
+                            if (search.startsWith("<@!")) {
+                                userId = Utils.tryParseLong(search.substring(3, search.length()-1));
+                            } else if (search.startsWith("<@")) {
+                                userId = Utils.tryParseLong(search.substring(2, search.length()-1));
+                            }
+                        }
+                        if(userId == null) {
+                            continue;
+                        }
+                    }
+                    Member member = guild.getMemberById(userId);
+                    if (member != null) {
+                        return Collections.singletonList(member);
+                    }
+                    continue;
+                }
+                case 1: {
+                    List<Member> members = guild.getMembersByName(search, true);
+                    if (members.size() != 1) {
+                        continue;
+                    }
+                    return Collections.singletonList(members.get(0));
+                }
+                case 2: {
+                    List<Member> members = guild.getMembersByName(search, false);
+                    if (members.isEmpty()) {
+                        continue;
+                    }
+                    return Collections.singletonList(members.get(0));
+                }
+                case 3: {
+                    List<Member> members = guild.getMembersByNickname(search, true);
+                    if (members.size() != 1) {
+                        continue;
+                    }
+                    return Collections.singletonList(members.get(0));
+                }
+                case 4:
+                    return guild.getMembersByNickname(search, false);
+                default:
+                    return Collections.emptyList();
+            }
+        }
+    }
+
     public static String[] parseCommandArgs(String args) {
         final char ESCAPE_CHAR = '\\';
         final char STRING_CHAR = '"';
@@ -454,5 +516,13 @@ public final class Utils {
             logger.warn("Desktop is not supported, can't browse URL");
         }
         return false;
+    }
+
+    public static String formatChannel(GuildChannel channel) {
+        return channel.getName();
+    }
+
+    public static String formatUser(User user) {
+        return user.getName() + "#" + user.getDiscriminator();
     }
 }

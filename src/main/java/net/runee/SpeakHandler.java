@@ -1,6 +1,7 @@
 package net.runee;
 
 import jouvieje.bass.Bass;
+import jouvieje.bass.defines.BASS_ACTIVE;
 import jouvieje.bass.defines.BASS_RECORD;
 import jouvieje.bass.defines.BASS_STREAM;
 import jouvieje.bass.structures.HRECORD;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import static jouvieje.bass.defines.BASS_ACTIVE.*;
 
 public class SpeakHandler implements AudioSendHandler, Closeable {
     private static final Logger logger = new Logger(SpeakHandler.class);
@@ -35,7 +38,8 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
         this.buffer = new byte[INPUT_FORMAT.getChannels() * (int) (INPUT_FORMAT.getSampleRate() * (FRAME_MILLIS / 1000f)) * (INPUT_FORMAT.getSampleSizeInBits() / 8)];
     }
 
-    public void openRecordingDevice(int recordingDevice) throws BassException {
+    public void openRecordingDevice(int recordingDevice, boolean setPlaying) throws BassException {
+        logger.info("openRecordingDevice");
         Utils.closeQuiet(this);
 
         this.recordingDevice = recordingDevice;
@@ -56,7 +60,11 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
                 if (!Bass.BASS_RecordInit(recordingDevice)) {
                     Utils.checkBassError();
                 }
-                this.recordingStream = Bass.BASS_RecordStart((int) INPUT_FORMAT.getSampleRate(), INPUT_FORMAT.getChannels(), BASS_STREAM.BASS_STREAM_AUTOFREE | BASS_RECORD.BASS_RECORD_PAUSE, SpeakHandler::RECORDPROC, null);
+                int flags = BASS_STREAM.BASS_STREAM_AUTOFREE;
+                if(!setPlaying) {
+                    flags |= BASS_RECORD.BASS_RECORD_PAUSE;
+                }
+                this.recordingStream = Bass.BASS_RecordStart((int) INPUT_FORMAT.getSampleRate(), INPUT_FORMAT.getChannels(), flags, SpeakHandler::RECORDPROC, null);
                 Utils.checkBassError();
             } catch (BassException ex) {
                 Utils.closeQuiet(this);
@@ -71,10 +79,21 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
         if(recordingStream == null) {
             return;
         }
-        if(playing) {
-            Bass.BASS_ChannelPlay(this.recordingStream.asInt(), false);
-        } else {
-            Bass.BASS_ChannelPause(this.recordingStream.asInt());
+        switch (Bass.BASS_ChannelIsActive(this.recordingStream.asInt())) {
+            case BASS_ACTIVE_PLAYING:
+            case BASS_ACTIVE_STALLED:
+                if(!playing) {
+                    Bass.BASS_ChannelStop(this.recordingStream.asInt());
+                }
+                break;
+            case BASS_ACTIVE_PAUSED:
+            case BASS_ACTIVE_STOPPED:
+                if(playing) {
+                    Bass.BASS_ChannelPlay(this.recordingStream.asInt(), false);
+                }
+                break;
+            default:
+                throw new IndexOutOfBoundsException();
         }
         Utils.checkBassError();
     }
@@ -85,7 +104,6 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
 
     private static boolean RECORDPROC(HRECORD handle, ByteBuffer buffer, int length, Pointer user) {
         List<SpeakHandler> handlers = getActiveHandlers(handle);
-
         byte[] sampleBuffer = new byte[2];
         int numSamplesToWrite = length / sampleBuffer.length;
         for (int s = 0; s < numSamplesToWrite; s++) {

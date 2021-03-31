@@ -10,6 +10,6 @@ public class GuildContextRequiredException extends CommandException {
 
     @Override
     public String getReplyMessage() {
-        return "Please issue this command in a server channel!";
+        return "Please issue this command in a guild channel!";
     }
 }
