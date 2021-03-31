@@ -54,16 +54,16 @@ public class SettingsPanel extends JPanel {
         speakEnabled = new JButton();
         speakEnabled.addActionListener(e -> {
             final Config cfg = DiscordAudioStreamBot.getConfig();
-            cfg.speakEnabled = !cfg.speakEnabled;
-            bot.setSpeakEnabled(cfg.speakEnabled);
+            cfg.speakEnabled = !cfg.getSpeakEnabled();
+            bot.setSpeakEnabled(cfg.getSpeakEnabled());
             updateSpeakEnabled();
             saveConfig();
         });
         listenEnabled = new JButton();
         listenEnabled.addActionListener(e -> {
             final Config cfg = DiscordAudioStreamBot.getConfig();
-            cfg.listenEnabled = !cfg.listenEnabled;
-            bot.setListenEnabled(cfg.listenEnabled);
+            cfg.listenEnabled = !cfg.getListenEnabled();
+            bot.setListenEnabled(cfg.getListenEnabled());
             updateListenEnabled();
             saveConfig();
         });
@@ -206,7 +206,7 @@ public class SettingsPanel extends JPanel {
     }
 
     private void updateSpeakEnabled() {
-        boolean enabled = DiscordAudioStreamBot.getConfig().speakEnabled;
+        boolean enabled = DiscordAudioStreamBot.getConfig().getSpeakEnabled();
         ImageIcon icon = Utils.getIcon("icomoon/32px/031-mic.png", 24, true);
         if(!enabled) {
             icon = new ImageIcon(Utils.overlayImage((BufferedImage) icon.getImage(), Utils.getIcon("runee/32px/strike-through.png", 24, true).getImage()));
@@ -216,7 +216,7 @@ public class SettingsPanel extends JPanel {
     }
 
     private void updateListenEnabled() {
-        boolean enabled = DiscordAudioStreamBot.getConfig().listenEnabled;
+        boolean enabled = DiscordAudioStreamBot.getConfig().getListenEnabled();
         ImageIcon icon = Utils.getIcon("icomoon/32px/017-headphones.png", 24, true);
         if(!enabled) {
             icon = new ImageIcon(Utils.overlayImage((BufferedImage) icon.getImage(), Utils.getIcon("runee/32px/strike-through.png", 24, true).getImage()));
