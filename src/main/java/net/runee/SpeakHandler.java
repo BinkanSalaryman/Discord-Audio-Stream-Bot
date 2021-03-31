@@ -39,7 +39,6 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
     }
 
     public void openRecordingDevice(int recordingDevice, boolean setPlaying) throws BassException {
-        logger.info("openRecordingDevice");
         Utils.closeQuiet(this);
 
         this.recordingDevice = recordingDevice;
@@ -83,7 +82,7 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
             case BASS_ACTIVE_PLAYING:
             case BASS_ACTIVE_STALLED:
                 if(!playing) {
-                    Bass.BASS_ChannelStop(this.recordingStream.asInt());
+                    Bass.BASS_ChannelPause(this.recordingStream.asInt());
                 }
                 break;
             case BASS_ACTIVE_PAUSED:
