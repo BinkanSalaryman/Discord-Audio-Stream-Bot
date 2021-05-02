@@ -3,20 +3,23 @@ package net.runee.gui.components;
 import com.jgoodies.forms.builder.FormBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.requests.CloseCode;
 import net.runee.DiscordAudioStreamBot;
 import net.runee.gui.MainFrame;
 import net.runee.misc.Utils;
 import net.runee.misc.gui.SpecBuilder;
-import net.runee.misc.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import javax.swing.*;
 
 public class HomePanel extends JPanel implements EventListener {
-    private static final Logger logger = new Logger(HomePanel.class);
+    private static final Logger logger = LoggerFactory.getLogger(HomePanel.class);
     private JLabel loginLabel;
     private JButton loginButton;
     private JLabel pingLabel;
@@ -26,7 +29,7 @@ public class HomePanel extends JPanel implements EventListener {
         this.mainFrame = mainFrame;
         initComponents();
         layoutComponents();
-        updateLoginStatus(JDA.Status.SHUTDOWN, true);
+        updateLoginStatus(JDA.Status.SHUTDOWN, true, null);
     }
 
     private void initComponents() {
@@ -88,7 +91,7 @@ public class HomePanel extends JPanel implements EventListener {
         result.setLayout(null);
         result.setBackground(Utils.colorBlack);
         result.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Utils.colorYellow, 2), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-        result.setSize(192, 192);
+        result.setSize(256, 256);
         result.setMinimumSize(result.getSize());
         result.setPreferredSize(result.getSize());
         result.setMaximumSize(result.getSize());
@@ -106,12 +109,16 @@ public class HomePanel extends JPanel implements EventListener {
     @Override
     public void onEvent(@Nonnull GenericEvent e) {
         if (e instanceof StatusChangeEvent) {
-            updateLoginStatus(((StatusChangeEvent) e).getNewValue(), false);
+            updateLoginStatus(((StatusChangeEvent) e).getNewValue(), false, null);
+        }
+        if (e instanceof ShutdownEvent) {
+            updateLoginStatus(JDA.Status.SHUTDOWN, false, ((ShutdownEvent) e).getCloseCode());
         }
     }
 
-    public void updateLoginStatus(JDA.Status status, boolean initial) {
-        loginLabel.setText("<html><center>Status:<br>"+format(status)+"</center></html>");
+    public void updateLoginStatus(JDA.Status status, boolean initial, CloseCode code) {
+        loginLabel.setText("<html><center>Status:<br>" + format(status) + (code != null ? " - " + code : "") + "</center></html>");
+        loginLabel.setFont(loginLabel.getFont().deriveFont(code == null ? 16f : 10f));
         switch (status) {
             case CONNECTED:
                 loginLabel.setForeground(Utils.colorGreen);

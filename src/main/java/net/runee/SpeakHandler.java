@@ -10,7 +10,8 @@ import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.runee.errors.BassException;
 import net.runee.misc.MemoryQueue;
 import net.runee.misc.Utils;
-import net.runee.misc.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -22,7 +23,7 @@ import java.util.List;
 import static jouvieje.bass.defines.BASS_ACTIVE.*;
 
 public class SpeakHandler implements AudioSendHandler, Closeable {
-    private static final Logger logger = new Logger(SpeakHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpeakHandler.class);
     public static final int FRAME_MILLIS = 20;
     public static final int MAX_LAG = 200;
     private static List<SpeakHandler> activeHandlers = new ArrayList<>();

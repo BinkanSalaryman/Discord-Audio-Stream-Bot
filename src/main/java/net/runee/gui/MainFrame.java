@@ -1,5 +1,9 @@
 package net.runee.gui;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.FileAppender;
 import com.jgoodies.common.base.SystemUtils;
 import jouvieje.bass.BassInit;
 import net.dv8tion.jda.api.JDA;
@@ -9,16 +13,18 @@ import net.runee.gui.components.HomePanel;
 import net.runee.gui.components.SettingsPanel;
 import net.runee.misc.Utils;
 import net.runee.misc.gui.BorderPanel;
-import net.runee.misc.logging.Logger;
-import net.runee.misc.logging.appender.Appender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
 public class MainFrame extends JFrame implements Runnable {
-    private static final Logger logger = new Logger(MainFrame.class);
+    private static final Logger logger = LoggerFactory.getLogger(MainFrame.class);
+    private static final File logFile = new File("app.log");
     private static MainFrame instance;
 
     public static void main(String[] args) {
@@ -29,10 +35,6 @@ public class MainFrame extends JFrame implements Runnable {
         Runtime.getRuntime().addShutdownHook(shutdownThread);
 
         Thread.setDefaultUncaughtExceptionHandler(MainFrame::uncaughtException);
-
-        if (DiscordAudioStreamBot.getConfig().getClearLogOnStart()) {
-            Logger.logPath.delete();
-        }
 
         logger.info("Hello World!");
 
@@ -66,7 +68,7 @@ public class MainFrame extends JFrame implements Runnable {
 
     private static void uncaughtException(Thread t, Throwable e) {
         logger.error("Uncaught exception in thread " + t.getName(), e);
-        JOptionPane.showMessageDialog(instance, "A fatal error occurred and the application will be closed.\nThe logs can be found at " + Logger.logPath.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(instance, "A fatal error occurred and the application will be closed.\nThe logs can be found at " + logFile.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
         System.exit(-1);
     }
 

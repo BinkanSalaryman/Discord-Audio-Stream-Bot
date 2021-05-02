@@ -21,7 +21,6 @@ import java.util.Objects;
 public class SettingsPanel extends JPanel {
     // general
     private JTextField botToken;
-    private JCheckBox clearLogOnStart;
 
     // audio
     private JButton speakEnabled;
@@ -42,11 +41,6 @@ public class SettingsPanel extends JPanel {
         botToken = new JTextField();
         Utils.addChangeListener(botToken, e -> {
             DiscordAudioStreamBot.getConfig().botToken = Utils.emptyStringToNull(((JTextField) e.getSource()).getText());
-            saveConfig();
-        });
-        clearLogOnStart = new JCheckBox();
-        clearLogOnStart.addActionListener(e -> {
-            DiscordAudioStreamBot.getConfig().clearLogOnStart = ((JCheckBox) e.getSource()).isSelected();
             saveConfig();
         });
 
@@ -98,7 +92,6 @@ public class SettingsPanel extends JPanel {
 
         // general
         botToken.setText(Utils.nullToEmptyString(config.botToken));
-        clearLogOnStart.setSelected(config.getClearLogOnStart());
 
         // voice
         speakEnabled.setSelected(config.getSpeakEnabled());
@@ -167,7 +160,7 @@ public class SettingsPanel extends JPanel {
                 .rows(SpecBuilder
                         .create()
                         .add("c:p") // general
-                        .add("c:p", 2)
+                        .add("c:p")
                         .gapUnrelated().add("c:p")
                         .add("c:p")
                         .add("t:p")
@@ -179,8 +172,6 @@ public class SettingsPanel extends JPanel {
                 .addSeparator("General").xyw(1, row, 7)
                 .add("Bot token").xy(1, row += 2)
                 /**/.add(botToken).xyw(3, row, 5)
-                .add("Clear log on startup").xy(1, row += 2)
-                /**/.add(clearLogOnStart).xyw(3, row, 5)
                 .addSeparator("Audio").xyw(1, row += 2, 7)
                 .add("Mute/Unmute").xy(1, row += 2)
                 /**/.add(speakEnabled).xy(3, row)

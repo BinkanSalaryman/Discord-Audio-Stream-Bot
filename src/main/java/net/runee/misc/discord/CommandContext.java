@@ -9,10 +9,11 @@ import net.runee.errors.CommandException;
 import net.runee.errors.GuildContextRequiredException;
 import net.runee.errors.InsufficientPermissionsException;
 import net.runee.misc.Utils;
-import net.runee.misc.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandContext {
-    private static final Logger logger = new Logger(CommandContext.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandContext.class);
 
     public CommandContext(JDA jda, User author, MessageChannel replyChannel) {
         this(jda, author, replyChannel, null);

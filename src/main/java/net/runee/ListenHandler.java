@@ -8,7 +8,8 @@ import net.dv8tion.jda.api.audio.CombinedAudio;
 import net.runee.errors.BassException;
 import net.runee.misc.MemoryQueue;
 import net.runee.misc.Utils;
-import net.runee.misc.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.Closeable;
@@ -20,7 +21,7 @@ import java.util.List;
 import static net.dv8tion.jda.api.audio.AudioSendHandler.INPUT_FORMAT;
 
 public class ListenHandler implements AudioReceiveHandler, Closeable {
-    private static final Logger logger = new Logger(ListenHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ListenHandler.class);
 
     public static final int MAX_LAG = 200;
     public static final int PLAYBACK_FLAGS = 0; //BASS_DEVICE.BASS_DEVICE_3D;

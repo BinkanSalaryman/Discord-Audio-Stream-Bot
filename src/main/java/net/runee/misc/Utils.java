@@ -8,7 +8,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.runee.errors.BassException;
 import net.runee.misc.gui.SpecBuilder;
-import net.runee.misc.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -45,7 +46,7 @@ public final class Utils {
     public static final int numMaxEmbedFields = 25;
 
     // private
-    private static final Logger logger = new Logger(Utils.class);
+    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
     private static Map<Integer, BufferedImage> missingIconCache = new HashMap<>();
 
     public static String readAllText(File file) throws IOException {

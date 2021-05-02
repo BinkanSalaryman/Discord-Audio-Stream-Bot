@@ -32,9 +32,10 @@ import net.runee.gui.components.HomePanel;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
 import net.runee.misc.discord.CommandContext;
-import net.runee.misc.logging.Logger;
+import org.slf4j.Logger;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -46,7 +47,7 @@ import java.util.*;
 import java.util.List;
 
 public class DiscordAudioStreamBot extends ListenerAdapter {
-    private static final Logger logger = new Logger(DiscordAudioStreamBot.class);
+    private static final Logger logger = LoggerFactory.getLogger(DiscordAudioStreamBot.class);
     public static final String NAME = "Discord Audio Stream Bot";
     public static final String GITHUB_URL = "https://github.com/BinkanSalaryman/Discord-Audio-Stream-Bot";
 
