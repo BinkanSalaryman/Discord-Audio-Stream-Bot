@@ -25,8 +25,8 @@ public class FollowVoiceCommand extends Command {
     public void execute(CommandContext ctx, String... args) throws CommandException {
         Guild guild = ctx.ensureAdminOrOwnerPermission();
         if(args.length >= 1) {
-            String action = args[0];
-            switch (action) {
+            String op = args[0];
+            switch (op) {
                 case "set":
                     if(args.length != 2) {
                         throw new IncorrectArgCountException(this, ctx);
@@ -57,6 +57,9 @@ public class FollowVoiceCommand extends Command {
                         throw new IncorrectArgCountException(this, ctx);
                     }
                     showFollowVoice(ctx, guild);
+                    break;
+                default:
+                    ctx.replyWarning("Unrecognized operation: `" + op + "`.");
                     break;
             }
         }

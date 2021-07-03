@@ -1,6 +1,5 @@
 package net.runee.commands.settings;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.runee.errors.CommandException;
@@ -30,11 +29,11 @@ public class BindCommand extends Command {
         if (args.length == 0) {
             throw new IncorrectArgCountException(this, ctx);
         }
-        String action = args[0].toLowerCase();
+        String op = args[0].toLowerCase();
         TextChannel channel;
 
         // verify
-        switch (action) {
+        switch (op) {
             case "add":
             case "remove":
             case "clear":
@@ -43,7 +42,7 @@ public class BindCommand extends Command {
         }
 
         // parse args
-        switch (action) {
+        switch (op) {
             case "add":
             case "remove": {
                 if (args.length != 2) {
@@ -73,14 +72,14 @@ public class BindCommand extends Command {
                 channel = null;
                 break;
             default:
-                ctx.replyWarning("Unrecognized action: `" + action + "`.");
+                ctx.replyWarning("Unrecognized operation: `" + op + "`.");
                 return;
         }
 
         // execute
         final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
-        switch (action) {
+        switch (op) {
             case "add":
                 addCommandChannel(ctx, guildConfig, channel);
                 break;

@@ -117,7 +117,7 @@ public class HomePanel extends JPanel implements EventListener {
     }
 
     public void updateLoginStatus(JDA.Status status, boolean initial, CloseCode code) {
-        loginLabel.setText("<html><center>Status:<br>" + format(status) + (code != null ? " - " + code : "") + "</center></html>");
+        loginLabel.setText("<html><center>Status:<br>" + format(status) + (code != null ? " - " + format(code) : "") + "</center></html>");
         loginLabel.setFont(loginLabel.getFont().deriveFont(code == null ? 16f : 10f));
         switch (status) {
             case CONNECTED:
@@ -159,6 +159,10 @@ public class HomePanel extends JPanel implements EventListener {
             words[i] = word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
         }
         return String.join(" ", words);
+    }
+
+    private String format(CloseCode code) {
+        return "CloseCode " + code.getCode() + ": " + code.getMeaning();
     }
 
     public void onPing(long ping) {

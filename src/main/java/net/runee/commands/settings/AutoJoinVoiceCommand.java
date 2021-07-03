@@ -27,10 +27,10 @@ public class AutoJoinVoiceCommand extends Command {
             throw new IncorrectArgCountException(this, ctx);
         }
 
-        String action = args[0].toLowerCase();
+        String op = args[0].toLowerCase();
         VoiceChannel channel = null;
 
-        switch (action) {
+        switch (op) {
             case "set": {
                 if (args.length != 2) {
                     throw new IncorrectArgCountException(this, ctx);
@@ -57,14 +57,14 @@ public class AutoJoinVoiceCommand extends Command {
                 }
                 break;
             default:
-                ctx.replyWarning("Unrecognized action: `" + action + "`.");
+                ctx.replyWarning("Unrecognized operation: `" + op + "`.");
                 return;
         }
 
         // execute
         GuildConfig guildConfig = getConfig().getGuildConfig(ctx.getGuild());
 
-        switch (action) {
+        switch (op) {
             case "set":
             case "clear":
                 setAutoVoiceChannel(ctx, guildConfig, channel);

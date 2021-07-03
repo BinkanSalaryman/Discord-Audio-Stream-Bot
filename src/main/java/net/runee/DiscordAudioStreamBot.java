@@ -2,7 +2,10 @@ package net.runee;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.dv8tion.jda.api.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.audio.AudioReceiveHandler;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.audio.hooks.ConnectionListener;
@@ -11,7 +14,6 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
-import net.dv8tion.jda.api.events.channel.voice.update.VoiceChannelUpdatePositionEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
@@ -20,21 +22,20 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.entities.DataMessage;
+import net.runee.commands.bot.*;
 import net.runee.commands.botuser.*;
 import net.runee.commands.settings.AutoJoinVoiceCommand;
-import net.runee.commands.bot.*;
 import net.runee.commands.settings.BindCommand;
 import net.runee.commands.settings.FollowVoiceCommand;
 import net.runee.commands.settings.PrefixCommand;
 import net.runee.errors.BassException;
 import net.runee.gui.MainFrame;
-import net.runee.gui.components.HomePanel;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
 import net.runee.misc.discord.CommandContext;
-import org.slf4j.Logger;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
@@ -43,8 +44,8 @@ import java.awt.*;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class DiscordAudioStreamBot extends ListenerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(DiscordAudioStreamBot.class);
@@ -152,6 +153,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                     new LeaveVoiceAllCommand(),
                     new LeaveVoiceCommand(),
                     new StatusCommand(),
+                    new StageCommand(),
                     // settings
                     new AutoJoinVoiceCommand(),
                     new BindCommand(),
@@ -172,7 +174,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
             for (int step = 0; true; step++) {
                 switch (step) {
                     case 0:
-                        if(guildConfig.followedUserId != null) {
+                        if (guildConfig.followedUserId != null) {
                             Guild guild = jda.getGuildById(guildConfig.guildId);
                             if (guild == null) {
                                 logger.warn("Failed to retrieve guild with id '" + guildConfig.guildId + "' to follow voice");
@@ -215,21 +217,21 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceJoin(@Nonnull GuildVoiceJoinEvent event) {
-        if(isFollowedVoiceTarget(event.getMember())) {
+        if (isFollowedVoiceTarget(event.getMember())) {
             joinVoice(event.getChannelJoined());
         }
     }
 
     @Override
     public void onGuildVoiceMove(@Nonnull GuildVoiceMoveEvent event) {
-        if(isFollowedVoiceTarget(event.getMember())) {
+        if (isFollowedVoiceTarget(event.getMember())) {
             joinVoice(event.getChannelJoined());
         }
     }
 
     @Override
     public void onGuildVoiceLeave(@Nonnull GuildVoiceLeaveEvent event) {
-        if(isFollowedVoiceTarget(event.getMember())) {
+        if (isFollowedVoiceTarget(event.getMember())) {
             leaveVoice(event.getGuild());
         }
     }
@@ -338,7 +340,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     }
 
     public void sendDirect(User user, MessageEmbed embed) {
-        sendDirect(user, new DataMessage(false, "", null, embed));
+        sendDirect(user, new DataMessage(false, "", null, Collections.singletonList(embed)));
     }
 
     public void joinVoice(VoiceChannel channel) {

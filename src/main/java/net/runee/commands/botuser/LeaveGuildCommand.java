@@ -52,6 +52,9 @@ public class LeaveGuildCommand extends Command {
             default:
                 throw new IncorrectArgCountException(this, ctx);
         }
-        guild.leave().queue();
+        guild.leave().queue(ignore -> {
+            ctx.replySuccess("Left guild.");
+        });
+
     }
 }

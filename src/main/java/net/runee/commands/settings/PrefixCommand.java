@@ -22,8 +22,8 @@ public class PrefixCommand extends Command {
         if (args.length == 0) {
             throw new IncorrectArgCountException(this, ctx);
         }
-        String action = args[0].toLowerCase();
-        switch (action) {
+        String op = args[0].toLowerCase();
+        switch (op) {
             case "set":
                 if (args.length != 2) {
                     throw new IncorrectArgCountException(this, ctx);
@@ -36,12 +36,12 @@ public class PrefixCommand extends Command {
                 }
                 break;
             default:
-                ctx.replyWarning("Unrecognized action: `" + action + "`.");
+                ctx.replyWarning("Unrecognized operation: `" + op + "`.");
                 break;
         }
 
         // execute
-        switch (action) {
+        switch (op) {
             case "set":
                 setPrefix(ctx, args[1]);
                 break;
