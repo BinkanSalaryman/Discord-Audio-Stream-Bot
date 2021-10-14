@@ -56,7 +56,7 @@
 
 
 ## Downloads
->[Latest build (2021-07-03)](https://drive.google.com/uc?export=download&id=0B6898q95NTM3eGxoSVljMlM3ekk) (yyyy-MM-dd)
+>[Latest build (2021-07-03)](https://drive.google.com/file/d/0B6898q95NTM3eGxoSVljMlM3ekk/view?usp=sharing&resourcekey=0-WRMuD2_H8996-7EDNC_9sQ) (yyyy-MM-dd)
 
 #### Tools
 * >[Virtual Cable](https://www.vb-audio.com/Cable/index.htm) (A virtual audio device working as virtual audio cable - After installation, restart bot program and set the recording device in settings tab to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or else you'll hear nothing)
