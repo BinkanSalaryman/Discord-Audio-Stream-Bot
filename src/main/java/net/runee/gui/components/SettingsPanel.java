@@ -21,6 +21,7 @@ import java.util.Objects;
 public class SettingsPanel extends JPanel {
     // general
     private JTextField botToken;
+    private JCheckBox autoLogin;
 
     // audio
     private JButton speakEnabled;
@@ -41,6 +42,13 @@ public class SettingsPanel extends JPanel {
         botToken = new JTextField();
         Utils.addChangeListener(botToken, e -> {
             DiscordAudioStreamBot.getConfig().botToken = Utils.emptyStringToNull(((JTextField) e.getSource()).getText());
+            updateAutoLoginEnabled();
+            saveConfig();
+        });
+        autoLogin = new JCheckBox();
+        autoLogin.addActionListener(e -> {
+            final Config cfg = DiscordAudioStreamBot.getConfig();
+            cfg.autoLogin = !cfg.isAutoLogin();
             saveConfig();
         });
 
@@ -88,15 +96,17 @@ public class SettingsPanel extends JPanel {
     }
 
     private void loadConfig() {
-        final Config config = DiscordAudioStreamBot.getConfig();
+        final Config cfg = DiscordAudioStreamBot.getConfig();
 
         // general
-        botToken.setText(Utils.nullToEmptyString(config.botToken));
+        botToken.setText(Utils.nullToEmptyString(cfg.botToken));
+        autoLogin.setSelected(cfg.isAutoLogin());
+        updateAutoLoginEnabled();
 
         // voice
-        speakEnabled.setSelected(config.getSpeakEnabled());
+        speakEnabled.setSelected(cfg.getSpeakEnabled());
         updateSpeakEnabled();
-        listenEnabled.setSelected(config.getListenEnabled());
+        listenEnabled.setSelected(cfg.getListenEnabled());
         updateListenEnabled();
         {
             DefaultListModel<RecordingDeviceItem> model = new DefaultListModel<>();
@@ -110,7 +120,7 @@ public class SettingsPanel extends JPanel {
             for (int i = 0; i < model.getSize(); i++) {
                 RecordingDeviceItem recordingDevice = model.get(i);
                 String recordingDeviceName = recordingDevice != null ? recordingDevice.getName() : null;
-                if (Objects.equals(recordingDeviceName, config.recordingDevice)) {
+                if (Objects.equals(recordingDeviceName, cfg.recordingDevice)) {
                     recordingDevices.setSelectedIndex(i);
                     break;
                 }
@@ -128,7 +138,7 @@ public class SettingsPanel extends JPanel {
             for (int i = 0; i < model.getSize(); i++) {
                 PlaybackDeviceItem playbackDeviceItem = model.get(i);
                 String playbackDeviceName = playbackDeviceItem != null ? playbackDeviceItem.getName() : null;
-                if (Objects.equals(playbackDeviceName, config.playbackDevice)) {
+                if (Objects.equals(playbackDeviceName, cfg.playbackDevice)) {
                     playbackDevices.setSelectedIndex(i);
                     break;
                 }
@@ -171,7 +181,9 @@ public class SettingsPanel extends JPanel {
                 .border(BorderFactory.createEmptyBorder(5, 5, 5, 5))
                 .addSeparator("General").xyw(1, row, 7)
                 .add("Bot token").xy(1, row += 2)
-                /**/.add(botToken).xyw(3, row, 5)
+                /**/.add(botToken).xy(3, row)
+                /**/.add("Auto login").xy(5, row)
+                /**/.add(autoLogin).xy(7, row)
                 .addSeparator("Audio").xyw(1, row += 2, 7)
                 .add("Mute/Unmute").xy(1, row += 2)
                 /**/.add(speakEnabled).xy(3, row)
@@ -196,10 +208,15 @@ public class SettingsPanel extends JPanel {
         }
     }
 
+    private void updateAutoLoginEnabled() {
+        boolean enabled = DiscordAudioStreamBot.getConfig().botToken != null;
+        autoLogin.setEnabled(enabled);
+    }
+
     private void updateSpeakEnabled() {
         boolean enabled = DiscordAudioStreamBot.getConfig().getSpeakEnabled();
         ImageIcon icon = Utils.getIcon("icomoon/32px/031-mic.png", 24, true);
-        if(!enabled) {
+        if (!enabled) {
             icon = new ImageIcon(Utils.overlayImage((BufferedImage) icon.getImage(), Utils.getIcon("runee/32px/strike-through.png", 24, true).getImage()));
         }
         speakEnabled.setIcon(icon);

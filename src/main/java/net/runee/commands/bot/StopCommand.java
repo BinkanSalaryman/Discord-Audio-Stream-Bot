@@ -1,19 +1,22 @@
 package net.runee.commands.bot;
 
-import net.runee.errors.CommandException;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.runee.errors.InsufficientPermissionsException;
+import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
-import net.runee.misc.discord.CommandCategory;
-import net.runee.misc.discord.CommandContext;
 
 public class StopCommand extends Command {
     public StopCommand() {
-        super("stop", "Stops the bot.", CommandCategory.BOT);
+        super(new CommandData("stop", "Stop the bot by logging off"));
+        _public = true;
     }
 
     @Override
-    public void execute(CommandContext ctx, String... args) throws CommandException {
-        ctx.ensureOwnerPermission();
-        ctx.replySuccess("0xDEADBEEF");
+    public void run(SlashCommandEvent ctx) throws InsufficientPermissionsException {
+        ensureOwnerPermission(ctx);
+        reply(ctx, "0xDEADBEEF", Utils.colorGreen);
         ctx.getJDA().shutdown();
     }
 }

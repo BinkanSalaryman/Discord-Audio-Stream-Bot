@@ -17,24 +17,24 @@ import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.entities.DataMessage;
 import net.runee.commands.bot.*;
-import net.runee.commands.botuser.*;
 import net.runee.commands.settings.AutoJoinVoiceCommand;
 import net.runee.commands.settings.BindCommand;
 import net.runee.commands.settings.FollowVoiceCommand;
-import net.runee.commands.settings.PrefixCommand;
+import net.runee.commands.user.*;
 import net.runee.errors.BassException;
+import net.runee.errors.CommandException;
 import net.runee.gui.MainFrame;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
-import net.runee.misc.discord.CommandContext;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DiscordAudioStreamBot extends ListenerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(DiscordAudioStreamBot.class);
@@ -100,7 +101,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     private JDA jda;
 
     // convenience
-    private List<Command> commands;
+    private Map<String, Command> commands;
 
     private DiscordAudioStreamBot() {
 
@@ -109,17 +110,26 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     public void login() throws LoginException {
         logger.info("Logging in...");
         jda = JDABuilder.create(config.botToken,
-                GatewayIntent.GUILD_MEMBERS,
-                GatewayIntent.GUILD_VOICE_STATES,
-                GatewayIntent.GUILD_MESSAGES,
-                //GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                GatewayIntent.DIRECT_MESSAGES
-                //GatewayIntent.DIRECT_MESSAGE_REACTIONS
-        )
+                        GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_VOICE_STATES,
+                        GatewayIntent.GUILD_MESSAGES,
+                        //GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                        GatewayIntent.DIRECT_MESSAGES
+                        //GatewayIntent.DIRECT_MESSAGE_REACTIONS
+                )
                 .addEventListeners(this)
                 .setEnableShutdownHook(false)
                 .build()
         ;
+        jda.setRequiredScopes("applications.commands"); // necessary for invite url which enables /command interactivity within discord client
+
+        jda.updateCommands()
+                .addCommands(getCommands().values()
+                        .stream()
+                        .map(Command::getData)
+                        .collect(Collectors.toList())
+                )
+                .queue();
     }
 
     public void logoff() {
@@ -137,29 +147,32 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         return jda.getInviteUrl(Permission.EMPTY_PERMISSIONS);
     }
 
-    public List<Command> getCommands() {
+    public Map<String, Command> getCommands() {
         if (commands == null) {
-            commands = new ArrayList<>(Arrays.asList(
+            List<Command> commands = Arrays.asList(
                     // bot
                     new AboutCommand(),
                     new ExitCommand(),
-                    new HelpCommand(),
                     new InviteCommand(),
+                    new LeaveVoiceAllCommand(),
                     new StopCommand(),
                     // bot user
                     new ActivityCommand(),
                     new JoinVoiceCommand(),
                     new LeaveGuildCommand(),
-                    new LeaveVoiceAllCommand(),
                     new LeaveVoiceCommand(),
                     new StatusCommand(),
                     new StageCommand(),
                     // settings
                     new AutoJoinVoiceCommand(),
                     new BindCommand(),
-                    new FollowVoiceCommand(),
-                    new PrefixCommand()
-            ));
+                    new FollowVoiceCommand()
+            );
+
+            this.commands = new HashMap<>();
+            for (Command cmd : commands) {
+                this.commands.put(cmd.getData().getName(), cmd);
+            }
         }
         return commands;
     }
@@ -193,15 +206,15 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                         }
                         continue;
                     case 1:
-                        if (guildConfig.autoJoinVoiceChanncelId != null) {
+                        if (guildConfig.autoJoinVoiceChannelId != null) {
                             Guild guild = jda.getGuildById(guildConfig.guildId);
                             if (guild == null) {
                                 logger.warn("Failed to retrieve guild with id '" + guildConfig.guildId + "' to auto-join voice");
                                 continue;
                             }
-                            VoiceChannel channel = guild.getVoiceChannelById(guildConfig.autoJoinVoiceChanncelId);
+                            VoiceChannel channel = guild.getVoiceChannelById(guildConfig.autoJoinVoiceChannelId);
                             if (channel == null) {
-                                logger.warn("Voice channel with id '" + guildConfig.autoJoinVoiceChanncelId + "' not found in guild " + guild.getName());
+                                logger.warn("Voice channel with id '" + guildConfig.autoJoinVoiceChannelId + "' not found in guild " + guild.getName());
                                 continue;
                             }
                             joinVoice(channel);
@@ -262,71 +275,32 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent e) {
-        String message = e.getMessage().getContentRaw();
-        if (e.isFromType(ChannelType.PRIVATE)) {
-            onCommandReceived(e, message);
-            return;
-        }
-
-        final GuildConfig guildConfig = config.getGuildConfig(e.getGuild());
-
-        List<String> prefixes = new ArrayList<>();
-        if (guildConfig.commandPrefix != null) {
-            prefixes.add(guildConfig.commandPrefix);
-        }
-        prefixes.add("<@" + jda.getSelfUser().getId() + ">");
-        prefixes.add("<@!" + jda.getSelfUser().getId() + ">");
-        for (String prefix : prefixes) {
-            if (message.startsWith(prefix)) {
-                onCommandReceived(e, message.substring(prefix.length()).replaceAll("^\\s+", ""));
-                return;
-            }
-        }
-    }
-
-    private void onCommandReceived(@Nonnull MessageReceivedEvent e, String cmd) {
-        if (e.getAuthor().isBot()) {
-            return;
-        }
-
-        if (e.getChannel() instanceof GuildChannel) {
-            final GuildConfig guildConfig = config.getGuildConfig(e.getGuild());
-            if (!guildConfig.isCommandChannel(e.getChannel())) {
-                if (e.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-                    e.getMessage().delete().queue();
-                }
-                sendDirect(e.getAuthor(), new EmbedBuilder()
-                        .setDescription("Please issue this command in one of the allowed command channels!")
+    public void onSlashCommand(@NotNull SlashCommandEvent e) {
+        Command cmd = getCommands().get(e.getName());
+        if (cmd != null) {
+            try {
+                cmd.run(e);
+            } catch (CommandException ex) {
+                e.replyEmbeds(new EmbedBuilder()
+                        .setDescription(ex.getReplyMessage())
                         .setColor(Utils.colorRed)
                         .build()
-                );
-                return;
+                ).setEphemeral(!cmd.isPublic()).queue();
+            } catch (Exception ex) {
+                logger.error("Failed to execute command " + e.getName(), ex);
+                e.replyEmbeds(new EmbedBuilder()
+                        .setDescription("Failed to execute command; details are in the log.")
+                        .setColor(Utils.colorRed)
+                        .build()
+                ).setEphemeral(!cmd.isPublic()).queue();
             }
-        }
-
-        int nameArgsSeparatorIdx = cmd.indexOf(" ");
-        final String name;
-        final String[] args;
-        if (nameArgsSeparatorIdx >= 0) {
-            name = cmd.substring(0, nameArgsSeparatorIdx);
-            args = Utils.parseCommandArgs(cmd.substring(nameArgsSeparatorIdx + 1));
         } else {
-            name = cmd;
-            args = new String[0];
+            e.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Unrecognized command: `" + e.getName() + "`!")
+                    .setColor(Utils.colorRed)
+                    .build()
+            ).setEphemeral(true).queue();
         }
-
-        for (Command command : getCommands()) {
-            if (command.getName().equals(name)) {
-                CommandContext ctx = new CommandContext(e);
-                ctx.run(command, args);
-                return;
-            }
-        }
-        e.getChannel().sendMessage(new EmbedBuilder()
-                .setDescription("Unrecognized command: `" + name + "`!")
-                .setColor(Utils.colorRed)
-                .build()).queue();
     }
 
     public void sendDirect(User user, Message message) {

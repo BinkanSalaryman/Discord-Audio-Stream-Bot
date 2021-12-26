@@ -45,9 +45,48 @@ public final class Utils {
 
     public static final int numMaxEmbedFields = 25;
 
+    public static final int KB = 1024;
+    public static final int MB = KB * KB;
+    public static final int GB = MB * KB;
+
     // private
     private static final Logger logger = LoggerFactory.getLogger(Utils.class);
     private static Map<Integer, BufferedImage> missingIconCache = new HashMap<>();
+
+    public static void printSystemInfo() {
+        Map<String, Object> info = new LinkedHashMap<>();
+        {
+            final Runtime rt = Runtime.getRuntime();
+            final Properties props = System.getProperties();
+            long xmx = rt.maxMemory();
+
+            info.put("Operating system", props.getProperty("os.name"));
+            info.put("OS architecture", props.getProperty("os.arch"));
+            info.put("Java version", props.getProperty("java.version"));
+            info.put("Available cores", rt.availableProcessors());
+            info.put("Available memory", xmx == Long.MAX_VALUE ? "(no limit)" : xmx / MB + " MB");
+        }
+
+        int maxKeyLen = 0;
+        int maxValLen = 0;
+        for (Map.Entry<String, Object> entry : info.entrySet()) {
+            maxKeyLen = Math.max(maxKeyLen, entry.getKey().length());
+            maxValLen = Math.max(maxValLen, String.valueOf(entry.getValue()).length());
+        }
+
+        final String separatorLine;
+        {
+            char[] chars = new char[maxKeyLen + 2 + maxValLen];
+            Arrays.fill(chars, '-');
+            separatorLine = new String(chars);
+        }
+
+        logger.info(separatorLine);
+        for (Map.Entry<String, Object> entry : info.entrySet()) {
+            logger.info(String.format("%-" + maxKeyLen + "s: %-" + maxValLen + "s", entry.getKey(), entry.getValue()));
+        }
+        logger.info(separatorLine);
+    }
 
     public static String readAllText(File file) throws IOException {
         return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
@@ -95,6 +134,10 @@ public final class Utils {
     }
 
     public static BufferedImage aspectFit(BufferedImage image, int width, int height) {
+        if (image.getWidth() == width && image.getHeight() == height) {
+            return image;
+        }
+
         double scalex = (double) width / image.getWidth();
         double scaley = (double) height / image.getHeight();
         double scale = Math.min(scalex, scaley);
@@ -384,14 +427,14 @@ public final class Utils {
                 case 0: {
                     Long userId = Utils.tryParseLong(search);
                     if (userId == null) {
-                        if(search.endsWith(">")) {
+                        if (search.endsWith(">")) {
                             if (search.startsWith("<@!")) {
-                                userId = Utils.tryParseLong(search.substring(3, search.length()-1));
+                                userId = Utils.tryParseLong(search.substring(3, search.length() - 1));
                             } else if (search.startsWith("<@")) {
-                                userId = Utils.tryParseLong(search.substring(2, search.length()-1));
+                                userId = Utils.tryParseLong(search.substring(2, search.length() - 1));
                             }
                         }
-                        if(userId == null) {
+                        if (userId == null) {
                             continue;
                         }
                     }

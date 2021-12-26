@@ -5,6 +5,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import com.jgoodies.common.base.SystemUtils;
+import com.jgoodies.looks.windows.WindowsLookAndFeel;
 import jouvieje.bass.BassInit;
 import net.dv8tion.jda.api.JDA;
 import net.runee.DiscordAudioStreamBot;
@@ -13,6 +14,7 @@ import net.runee.gui.components.HomePanel;
 import net.runee.gui.components.SettingsPanel;
 import net.runee.misc.Utils;
 import net.runee.misc.gui.BorderPanel;
+import net.runee.model.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,18 +39,19 @@ public class MainFrame extends JFrame implements Runnable {
         Thread.setDefaultUncaughtExceptionHandler(MainFrame::uncaughtException);
 
         logger.info("Hello World!");
+        Utils.printSystemInfo();
 
         // set L&F
         try {
             if (SystemUtils.IS_OS_WINDOWS) {
-                System.setProperty("swing.systemlaf", "com.jgoodies.looks.windows.WindowsLookAndFeel");
+                System.setProperty("swing.systemlaf", com.jgoodies.looks.windows.WindowsLookAndFeel.class.getName());
             }
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
             logger.warn("Failed to set L&F", ex);
         }
 
-        // load libraries
+        // load bass natives
         BassInit.loadLibraries();
 
         // run app
@@ -89,6 +92,14 @@ public class MainFrame extends JFrame implements Runnable {
         setIconImage(Utils.getIcon("icomoon/32px/017-headphones.png", 32, true).getImage());
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                final Config config = DiscordAudioStreamBot.getConfig();
+                if(config.botToken != null && config.isAutoLogin()) {
+                    tabHome.loginButtonPressed(1);
+                }
+            }
+
             @Override
             public void windowClosing(WindowEvent e) {
                 JDA jda = DiscordAudioStreamBot.getInstance().getJDA();

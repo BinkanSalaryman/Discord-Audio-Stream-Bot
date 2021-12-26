@@ -38,29 +38,7 @@ public class HomePanel extends JPanel implements EventListener {
 
         loginButton = new JButton("", Utils.getIcon("icomoon/32px/183-switch.png", 32, true));
         loginButton.addActionListener(e -> {
-            loginButton.setEnabled(false);
-            final DiscordAudioStreamBot bot = DiscordAudioStreamBot.getInstance();
-            switch (bot.getJDA() != null ? bot.getJDA().getStatus() : JDA.Status.SHUTDOWN) {
-                case CONNECTED:
-                    bot.logoff();
-                    break;
-                case SHUTDOWN:
-                case FAILED_TO_LOGIN:
-                    if (DiscordAudioStreamBot.getConfig().botToken == null) {
-                        JOptionPane.showMessageDialog(HomePanel.this, "A bot token must be set.", "Error", JOptionPane.ERROR_MESSAGE);
-                        loginButton.setEnabled(true);
-                        return;
-                    }
-                    try {
-                        bot.login();
-                        bot.getJDA().addEventListener(this);
-                    } catch (LoginException ex) {
-                        logger.error("Failed to log in", ex);
-                        JOptionPane.showMessageDialog(HomePanel.this, "Failed to log in:\n\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                        loginButton.setEnabled(true);
-                    }
-                    break;
-            }
+            loginButtonPressed(0);
         });
 
         pingLabel = new JLabel("Ping: N/A");
@@ -113,6 +91,36 @@ public class HomePanel extends JPanel implements EventListener {
         }
         if (e instanceof ShutdownEvent) {
             updateLoginStatus(JDA.Status.SHUTDOWN, false, ((ShutdownEvent) e).getCloseCode());
+        }
+    }
+
+    public void loginButtonPressed(int toggle__login__logoff) {
+        loginButton.setEnabled(false);
+        final DiscordAudioStreamBot bot = DiscordAudioStreamBot.getInstance();
+        switch (bot.getJDA() != null ? bot.getJDA().getStatus() : JDA.Status.SHUTDOWN) {
+            case CONNECTED:
+                if(toggle__login__logoff != 1) {
+                    bot.logoff();
+                }
+                break;
+            case SHUTDOWN:
+            case FAILED_TO_LOGIN:
+                if (DiscordAudioStreamBot.getConfig().botToken == null) {
+                    JOptionPane.showMessageDialog(HomePanel.this, "A bot token must be set.", "Error", JOptionPane.ERROR_MESSAGE);
+                    loginButton.setEnabled(true);
+                    return;
+                }
+                if(toggle__login__logoff != 2) {
+                    try {
+                        bot.login();
+                        bot.getJDA().addEventListener(this);
+                    } catch (LoginException ex) {
+                        logger.error("Failed to log in", ex);
+                        JOptionPane.showMessageDialog(HomePanel.this, "Failed to log in:\n\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        loginButton.setEnabled(true);
+                    }
+                }
+                break;
         }
     }
 

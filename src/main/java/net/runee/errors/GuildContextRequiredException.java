@@ -1,11 +1,11 @@
 package net.runee.errors;
 
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.runee.misc.discord.Command;
-import net.runee.misc.discord.CommandContext;
 
 public class GuildContextRequiredException extends CommandException {
-    public GuildContextRequiredException(Command command, CommandContext context) {
-        super(command, context);
+    public GuildContextRequiredException(Command cmd, SlashCommandEvent ctx) {
+        super(cmd, ctx);
     }
 
     @Override

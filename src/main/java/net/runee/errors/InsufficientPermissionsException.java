@@ -1,11 +1,11 @@
 package net.runee.errors;
 
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.runee.misc.discord.Command;
-import net.runee.misc.discord.CommandContext;
 
 public class InsufficientPermissionsException extends CommandException {
-    public InsufficientPermissionsException(Command command, CommandContext context) {
-        super(command, context);
+    public InsufficientPermissionsException(Command cmd, SlashCommandEvent ctx) {
+        super(cmd, ctx);
     }
 
     @Override

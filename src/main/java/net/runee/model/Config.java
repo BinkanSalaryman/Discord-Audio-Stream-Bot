@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public class Config {
     public String botToken;
+    public Boolean autoLogin;
     public Boolean speakEnabled;
     public String recordingDevice;
     public Boolean listenEnabled;
@@ -20,6 +21,7 @@ public class Config {
 
     public Config(Config copy, boolean copyGuildConfigs) {
         this.botToken = copy.botToken;
+        this.autoLogin = copy.autoLogin;
         this.speakEnabled = copy.speakEnabled;
         this.recordingDevice = copy.recordingDevice;
         this.listenEnabled = copy.listenEnabled;
@@ -30,6 +32,10 @@ public class Config {
                 this.guildConfigs.add(new GuildConfig(guildConfig));
             }
         }
+    }
+
+    public boolean isAutoLogin() {
+        return autoLogin != null ? autoLogin : false;
     }
 
     public boolean getSpeakEnabled() {
