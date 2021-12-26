@@ -22,7 +22,7 @@
 * In the home tab, click the big on/off button to log in to the bot user with the token
 * In the maintenance tab, invite/add the bot to a guild/server, if necessary
 #### Part 3 - Test run
-* Use `/join` to bring the bot user up in a voice channel (if "slash commands" don't show up, you may need to re-invite with the update new authorization grant link including the `applications.commands` scope!)
+* Use `/join` to bring the bot user up in a voice channel (if "slash commands" don't show up, you may need to re-invite with the new authorization grant link including the `applications.commands` scope!)
 * In the settings tab of the bot program, unmute the bot
 * Choose & select a recording device (default one being your microphone, most likely)
 * Now it should be sending audio from the selected recording device to discord. Enjoy!
