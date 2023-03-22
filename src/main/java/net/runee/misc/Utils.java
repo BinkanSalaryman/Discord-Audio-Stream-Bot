@@ -6,6 +6,8 @@ import jouvieje.bass.defines.BASS_ERROR;
 import jouvieje.bass.structures.BASS_DEVICEINFO;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.*;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.runee.errors.BassException;
 import net.runee.misc.gui.SpecBuilder;
 import org.slf4j.Logger;
@@ -311,7 +313,7 @@ public final class Utils {
             switch (step) {
                 case 0: {
                     // try to connect to author's channel
-                    VoiceChannel channel = author.getVoiceState().getChannel();
+                    VoiceChannel channel = author.getVoiceState().getChannel().asVoiceChannel();
                     if (channel == null) {
                         continue;
                     }

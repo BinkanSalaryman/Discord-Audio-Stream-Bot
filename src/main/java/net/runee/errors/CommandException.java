@@ -1,13 +1,13 @@
 package net.runee.errors;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.runee.misc.discord.Command;
 
 public abstract class CommandException extends Exception {
     private Command command;
-    private SlashCommandEvent context;
+    private SlashCommandInteractionEvent context;
 
-    public CommandException(Command cmd, SlashCommandEvent ctx) {
+    public CommandException(Command cmd, SlashCommandInteractionEvent ctx) {
         this.command = cmd;
         this.context = ctx;
     }
@@ -16,7 +16,7 @@ public abstract class CommandException extends Exception {
         return command;
     }
 
-    public SlashCommandEvent getContext() {
+    public SlashCommandInteractionEvent getContext() {
         return context;
     }
 

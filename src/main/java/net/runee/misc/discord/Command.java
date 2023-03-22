@@ -3,7 +3,7 @@ package net.runee.misc.discord;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.runee.DiscordAudioStreamBot;
@@ -28,13 +28,13 @@ public abstract class Command {
         return _public;
     }
 
-    public abstract void run(SlashCommandEvent ctx) throws CommandException;
+    public abstract void run(SlashCommandInteractionEvent ctx) throws CommandException;
 
-    protected void reply(SlashCommandEvent ctx, CharSequence text, Color color) {
+    protected void reply(SlashCommandInteractionEvent ctx, CharSequence text, Color color) {
         reply(ctx, text, color, _public);
     }
 
-    protected void reply(SlashCommandEvent ctx, CharSequence text, Color color, boolean _public) {
+    protected void reply(SlashCommandInteractionEvent ctx, CharSequence text, Color color, boolean _public) {
         ctx.replyEmbeds(new EmbedBuilder()
                 .setDescription(text)
                 .setColor(color)
@@ -42,33 +42,33 @@ public abstract class Command {
         ).setEphemeral(!_public).queue();
     }
 
-    protected Boolean getOptionalBoolean(SlashCommandEvent ctx, String optionName) {
+    protected Boolean getOptionalBoolean(SlashCommandInteractionEvent ctx, String optionName) {
         OptionMapping option = ctx.getOption(optionName);
         return option != null ? option.getAsBoolean() : null;
     }
 
-    protected boolean getOptionalBoolean(SlashCommandEvent ctx, String optionName, boolean _default) {
+    protected boolean getOptionalBoolean(SlashCommandInteractionEvent ctx, String optionName, boolean _default) {
         OptionMapping option = ctx.getOption(optionName);
         return option != null ? option.getAsBoolean() : _default;
     }
 
-    protected boolean isGuildContext(SlashCommandEvent ctx) {
+    protected boolean isGuildContext(SlashCommandInteractionEvent ctx) {
         return ctx.getGuild() != null;
     }
 
-    protected Guild ensureGuildContext(SlashCommandEvent ctx) throws GuildContextRequiredException {
+    protected Guild ensureGuildContext(SlashCommandInteractionEvent ctx) throws GuildContextRequiredException {
         if (ctx.getGuild() == null) {
             throw new GuildContextRequiredException(this, ctx);
         }
         return ctx.getGuild();
     }
 
-    protected boolean isOwner(SlashCommandEvent ctx) {
+    protected boolean isOwner(SlashCommandInteractionEvent ctx) {
         ApplicationInfo appInfo = ctx.getJDA().retrieveApplicationInfo().complete();
         return ctx.getUser().equals(appInfo.getOwner());
     }
 
-    protected boolean isAdmin(SlashCommandEvent ctx) {
+    protected boolean isAdmin(SlashCommandInteractionEvent ctx) {
         if(ctx.getGuild() == null) {
             return false;
         }
@@ -76,7 +76,7 @@ public abstract class Command {
         return ctx.getMember().hasPermission(Permission.ADMINISTRATOR);
     }
 
-    protected Guild ensureAdminOrOwnerPermission(SlashCommandEvent ctx) throws InsufficientPermissionsException, GuildContextRequiredException {
+    protected Guild ensureAdminOrOwnerPermission(SlashCommandInteractionEvent ctx) throws InsufficientPermissionsException, GuildContextRequiredException {
         ensureGuildContext(ctx);
         if(!isAdmin(ctx)) {
             ensureOwnerPermission(ctx);
@@ -84,13 +84,13 @@ public abstract class Command {
         return ctx.getGuild();
     }
 
-    protected void ensureOwnerPermission(SlashCommandEvent ctx) throws InsufficientPermissionsException {
+    protected void ensureOwnerPermission(SlashCommandInteractionEvent ctx) throws InsufficientPermissionsException {
         if(!isOwner(ctx)) {
             throw new InsufficientPermissionsException(this, ctx);
         }
     }
 
-    protected OptionMapping ensureOptionPresent(SlashCommandEvent ctx, String optionName) throws MissingOptionException {
+    protected OptionMapping ensureOptionPresent(SlashCommandInteractionEvent ctx, String optionName) throws MissingOptionException {
         OptionMapping option = ctx.getOption(optionName);
         if(option == null) {
             throw new MissingOptionException(this, ctx, optionName);
@@ -98,7 +98,7 @@ public abstract class Command {
         return option;
     }
 
-    protected OptionMapping[] ensureOptionPresent(SlashCommandEvent ctx, String... optionNames) throws MissingOptionException {
+    protected OptionMapping[] ensureOptionPresent(SlashCommandInteractionEvent ctx, String... optionNames) throws MissingOptionException {
         OptionMapping[] options = new OptionMapping[optionNames.length];
         for (int i = 0; i < options.length; i++) {
             options[i] = ensureOptionPresent(ctx, optionNames[i]);
@@ -106,13 +106,13 @@ public abstract class Command {
         return options;
     }
 
-    protected void ensureOptionAbsent(SlashCommandEvent ctx, String optionName) throws IllegalOptionException {
+    protected void ensureOptionAbsent(SlashCommandInteractionEvent ctx, String optionName) throws IllegalOptionException {
         if(ctx.getOption(optionName) != null) {
             throw new IllegalOptionException(this, ctx, "channel");
         }
     }
 
-    protected void ensureOptionAbsent(SlashCommandEvent ctx, String... optionNames) throws IllegalOptionException {
+    protected void ensureOptionAbsent(SlashCommandInteractionEvent ctx, String... optionNames) throws IllegalOptionException {
         for (String optionName : optionNames) {
             ensureOptionAbsent(ctx, optionName);
         }

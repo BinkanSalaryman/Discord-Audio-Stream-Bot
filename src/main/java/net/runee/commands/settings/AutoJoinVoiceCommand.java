@@ -1,10 +1,12 @@
 package net.runee.commands.settings;
 
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.runee.errors.CommandException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
@@ -14,14 +16,14 @@ import java.util.Locale;
 
 public class AutoJoinVoiceCommand extends Command {
     public AutoJoinVoiceCommand() {
-        super(new CommandData("autojoin", "Mark a voice channel to be connected to after login"));
-        data.addOption(OptionType.STRING, "op", "Operation to perform (set|clear|show)", true);
-        data.addOption(OptionType.CHANNEL, "channel", "Voice channel in question. Only valid if op = 'set'", false);
+        super(Commands.slash("autojoin", "Mark a voice channel to be connected to after login"));
+        ((SlashCommandData)data).addOption(OptionType.STRING, "op", "Operation to perform (set|clear|show)", true);
+        ((SlashCommandData)data).addOption(OptionType.CHANNEL, "channel", "Voice channel in question. Only valid if op = 'set'", false);
         _public = true;
     }
 
     @Override
-    public void run(SlashCommandEvent ctx) throws CommandException {
+    public void run(SlashCommandInteractionEvent ctx) throws CommandException {
         ensureAdminOrOwnerPermission(ctx);
 
         String op = ensureOptionPresent(ctx, "op").getAsString().toLowerCase(Locale.ROOT);
@@ -30,7 +32,7 @@ public class AutoJoinVoiceCommand extends Command {
 
         switch (op) {
             case "set": {
-                GuildChannel guildChannel = ensureOptionPresent(ctx, "channel").getAsGuildChannel();
+                GuildChannel guildChannel = ensureOptionPresent(ctx, "channel").getAsChannel();
                 if (guildChannel instanceof VoiceChannel) {
                     channel = (VoiceChannel) guildChannel;
                 } else {
@@ -64,7 +66,7 @@ public class AutoJoinVoiceCommand extends Command {
         }
     }
 
-    private void setAutoVoiceChannel(SlashCommandEvent ctx, GuildConfig guildConfig, VoiceChannel channel) {
+    private void setAutoVoiceChannel(SlashCommandInteractionEvent ctx, GuildConfig guildConfig, VoiceChannel channel) {
         guildConfig.autoJoinVoiceChannelId = channel != null ? channel.getId() : null;
         saveConfig();
         if (channel != null) {
@@ -74,7 +76,7 @@ public class AutoJoinVoiceCommand extends Command {
         }
     }
 
-    private void showAutoVoiceChannel(SlashCommandEvent ctx, GuildConfig guildConfig) {
+    private void showAutoVoiceChannel(SlashCommandInteractionEvent ctx, GuildConfig guildConfig) {
         if (guildConfig.autoJoinVoiceChannelId != null) {
             reply(ctx, "Current auto-join voice channel: " + formatChannel(ctx, guildConfig.autoJoinVoiceChannelId) + ".", Utils.colorGreen);
         } else {
@@ -82,7 +84,7 @@ public class AutoJoinVoiceCommand extends Command {
         }
     }
 
-    private String formatChannel(SlashCommandEvent ctx, String channelId) {
+    private String formatChannel(SlashCommandInteractionEvent ctx, String channelId) {
         VoiceChannel voiceChannel = ctx.getJDA().getVoiceChannelById(channelId);
         return "`" + (voiceChannel != null ? Utils.formatChannel(voiceChannel) : channelId) + "`";
     }

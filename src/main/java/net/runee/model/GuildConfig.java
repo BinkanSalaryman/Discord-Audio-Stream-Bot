@@ -1,7 +1,7 @@
 package net.runee.model;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -11,17 +11,17 @@ import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.api.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.internal.entities.DataMessage;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.runee.commands.bot.*;
 import net.runee.commands.settings.AutoJoinVoiceCommand;
 import net.runee.commands.settings.BindCommand;
@@ -198,9 +198,9 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                                 logger.warn("User with id '" + guildConfig.followedUserId + "' not found in guild " + guild.getName());
                                 continue;
                             }
-                            VoiceChannel target_channel = target.getVoiceState().getChannel();
+                            AudioChannelUnion target_channel = target.getVoiceState().getChannel();
                             if (target_channel != null) {
-                                joinVoice(target_channel);
+                                joinVoice(target_channel.asVoiceChannel());
                                 return;
                             }
                         }
@@ -229,23 +229,17 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildVoiceJoin(@Nonnull GuildVoiceJoinEvent event) {
-        if (isFollowedVoiceTarget(event.getMember())) {
-            joinVoice(event.getChannelJoined());
+    public void onGuildVoiceUpdate(@Nonnull GuildVoiceUpdateEvent event) {
+        if (event.getChannelLeft() != null) {
+            if (isFollowedVoiceTarget(event.getMember())) {
+                leaveVoice(event.getGuild());
+            }
         }
-    }
 
-    @Override
-    public void onGuildVoiceMove(@Nonnull GuildVoiceMoveEvent event) {
-        if (isFollowedVoiceTarget(event.getMember())) {
-            joinVoice(event.getChannelJoined());
-        }
-    }
-
-    @Override
-    public void onGuildVoiceLeave(@Nonnull GuildVoiceLeaveEvent event) {
-        if (isFollowedVoiceTarget(event.getMember())) {
-            leaveVoice(event.getGuild());
+        if (event.getChannelJoined() != null) {
+            if (isFollowedVoiceTarget(event.getMember())) {
+                joinVoice(event.getChannelJoined().asVoiceChannel());
+            }
         }
     }
 
@@ -275,7 +269,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
     }
 
     @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent e) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
         Command cmd = getCommands().get(e.getName());
         if (cmd != null) {
             try {
@@ -303,18 +297,18 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         }
     }
 
-    public void sendDirect(User user, Message message) {
+    public void sendDirect(User user, MessageCreateData message) {
         user.openPrivateChannel().queue(chan -> {
             chan.sendMessage(message).queue();
         });
     }
 
     public void sendDirect(User user, String message) {
-        sendDirect(user, new DataMessage(false, message, null, null));
+        sendDirect(user, MessageCreateData.fromContent(message));
     }
 
     public void sendDirect(User user, MessageEmbed embed) {
-        sendDirect(user, new DataMessage(false, "", null, Collections.singletonList(embed)));
+        sendDirect(user, MessageCreateData.fromEmbeds(embed));
     }
 
     public void joinVoice(VoiceChannel channel) {

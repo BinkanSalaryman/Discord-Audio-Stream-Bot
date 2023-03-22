@@ -1,12 +1,14 @@
 package net.runee.commands.user;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.StageChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.StageChannel;
 import net.dv8tion.jda.api.entities.StageInstance;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.runee.errors.CommandException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
@@ -15,14 +17,14 @@ import java.util.Locale;
 
 public class StageCommand extends Command {
     public StageCommand() {
-        super(new CommandData("stage", "Manage the bot users speech on stage"));
-        data.addOption(OptionType.STRING, "op", "Operation to perform (start|end|speak|withdraw|topic|privacy)", true);
-        data.addOption(OptionType.STRING, "new_value", "New stage topic or privacy level, only valid if op = 'topic' or 'privacy'", false);
-        data.addOption(OptionType.BOOLEAN, "public", "Whether to show this command to others or not", false);
+        super(Commands.slash("stage", "Manage the bot users speech on stage"));
+        ((SlashCommandData)data).addOption(OptionType.STRING, "op", "Operation to perform (start|end|speak|withdraw|topic|privacy)", true);
+        ((SlashCommandData)data).addOption(OptionType.STRING, "new_value", "New stage topic or privacy level, only valid if op = 'topic' or 'privacy'", false);
+        ((SlashCommandData)data).addOption(OptionType.BOOLEAN, "public", "Whether to show this command to others or not", false);
     }
 
     @Override
-    public void run(SlashCommandEvent ctx) throws CommandException {
+    public void run(SlashCommandInteractionEvent ctx) throws CommandException {
         _public = getOptionalBoolean(ctx, "public", false);
 
         String op = ensureOptionPresent(ctx, "op").getAsString().toLowerCase(Locale.ROOT);
@@ -41,7 +43,7 @@ public class StageCommand extends Command {
                 break;
         }
 
-        VoiceChannel voiceChannel = guild.getAudioManager().getConnectedChannel();
+        VoiceChannel voiceChannel = guild.getAudioManager().getConnectedChannel().asVoiceChannel();
         if (!(voiceChannel instanceof StageChannel)) {
             reply(ctx, "Not connected - join a stage channel first!", Utils.colorRed);
             return;
@@ -69,12 +71,12 @@ public class StageCommand extends Command {
                 });
                 break;
             case "speak":
-                stage.requestToSpeak().queue(ignore -> {
+                channel.requestToSpeak().queue(ignore -> {
                     reply(ctx, "Requested to speak on stage.", Utils.colorGreen);
                 });
                 break;
             case "withdraw":
-                stage.cancelRequestToSpeak().queue(ignore -> {
+                channel.cancelRequestToSpeak().queue(ignore -> {
                     reply(ctx, "Canceled request to speak on stage.", Utils.colorGreen);
                 });
                 break;
