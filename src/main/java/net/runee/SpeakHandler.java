@@ -2,6 +2,7 @@ package net.runee;
 
 import jouvieje.bass.Bass;
 import jouvieje.bass.defines.BASS_ACTIVE;
+import jouvieje.bass.defines.BASS_ERROR;
 import jouvieje.bass.defines.BASS_RECORD;
 import jouvieje.bass.defines.BASS_STREAM;
 import jouvieje.bass.structures.HRECORD;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static jouvieje.bass.defines.BASS_ACTIVE.*;
+import static jouvieje.bass.defines.BASS_ERROR.BASS_ERROR_HANDLE;
 
 public class SpeakHandler implements AudioSendHandler, Closeable {
     private static final Logger logger = LoggerFactory.getLogger(SpeakHandler.class);
@@ -77,7 +79,7 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
 
     public void setPlaying(boolean playing) throws BassException {
         if(recordingStream == null) {
-            return;
+            throw new IllegalStateException("No open stream, call openRecordingDevice first");
         }
         switch (Bass.BASS_ChannelIsActive(this.recordingStream.asInt())) {
             case BASS_ACTIVE_PLAYING:
@@ -95,7 +97,17 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
             default:
                 throw new IndexOutOfBoundsException();
         }
-        Utils.checkBassError();
+        try {
+            Utils.checkBassError();
+        } catch(BassException ex) {
+            if(ex.getError() == BASS_ERROR_HANDLE) {
+                // TODO invalid handle:
+                // not sure why, but after moving around guilds/channels a few times (with follow-audio on), the stream handle randomly becomes invalid (probably a synchronization issue)
+                // as a workaround, let's open a new stream
+                logger.warn("Workaround: Restarting recording stream", ex);
+                openRecordingDevice(recordingDevice, playing);
+            }
+        }
     }
 
     public float getLag() {
@@ -165,10 +177,13 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
         if (recordingDevice >= 0) {
             Bass.BASS_RecordSetDevice(recordingDevice);
             Bass.BASS_RecordFree();
-            Utils.checkBassError();
         }
         memoryQueue = null;
         recordingStream = null;
-        recordingDevice = -1;
+        // TODO invalid handle:
+        // not sure why, but after moving around guilds/channels a few times (with follow-audio on), the stream handle becomes invalid  (probably a synchronization issue)
+        // as a workaround, keep the recording device last used
+        //recordingDevice = -1;
+        Utils.checkBassError();
     }
 }

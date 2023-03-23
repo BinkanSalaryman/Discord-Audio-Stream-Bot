@@ -1,30 +1,29 @@
 package net.runee.commands.settings;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.runee.errors.CommandException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
-
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class BindCommand extends Command {
     public BindCommand() {
-        super(new CommandData("bind", "Manage which channels to accept commands from"));
+        super(Commands.slash("bind", "Manage which channels to accept commands from"));
         data.addOption(OptionType.STRING, "op", "Operation to perform (add|remove|clear|show)", true);
         data.addOption(OptionType.CHANNEL, "channel", "Channel to add/remove to list of accepted command channels. Only valid if op = 'add' or 'remove'", false);
         _public = true;
     }
 
     @Override
-    public void run(SlashCommandEvent ctx) throws CommandException {
+    public void run(SlashCommandInteractionEvent ctx) throws CommandException {
         String op = ensureOptionPresent(ctx, "op").getAsString().toLowerCase(Locale.ROOT);
 
         final Guild guild = ensureGuildContext(ctx);
@@ -40,9 +39,9 @@ public class BindCommand extends Command {
         switch (op) {
             case "add":
             case "remove": {
-                MessageChannel messageChannel = ensureOptionPresent(ctx, "channel").getAsMessageChannel();
-                if (messageChannel instanceof TextChannel) {
-                    channel = (TextChannel) messageChannel;
+                GuildChannelUnion guildChannel = ensureOptionPresent(ctx, "channel").getAsChannel();
+                if (guildChannel instanceof TextChannel) {
+                    channel = guildChannel.asTextChannel();
                 } else {
                     reply(ctx, "Channel is not a from a guild", Utils.colorRed);
                     return;
@@ -80,7 +79,7 @@ public class BindCommand extends Command {
         }
     }
 
-    private void addCommandChannel(SlashCommandEvent ctx, GuildConfig guildConfig, TextChannel channel) {
+    private void addCommandChannel(SlashCommandInteractionEvent ctx, GuildConfig guildConfig, TextChannel channel) {
         int oldSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
         guildConfig.addCommandChannel(channel);
         int newSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
@@ -92,7 +91,7 @@ public class BindCommand extends Command {
         }
     }
 
-    private void removeCommandChannel(SlashCommandEvent ctx, GuildConfig guildConfig, TextChannel channel) {
+    private void removeCommandChannel(SlashCommandInteractionEvent ctx, GuildConfig guildConfig, TextChannel channel) {
         int oldSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
         guildConfig.removeCommandChannel(channel);
         int newSize = guildConfig.commandChannelIds != null ? guildConfig.commandChannelIds.size() : -1;
@@ -105,13 +104,13 @@ public class BindCommand extends Command {
         }
     }
 
-    private void clearCommandChannels(SlashCommandEvent ctx, GuildConfig guildConfig) {
+    private void clearCommandChannels(SlashCommandInteractionEvent ctx, GuildConfig guildConfig) {
         guildConfig.commandChannelIds = null;
         saveConfig();
         reply(ctx, "All bindings cleared - commands from any channel will be accepted.", Utils.colorGreen);
     }
 
-    private void showCommandChannels(SlashCommandEvent ctx, GuildConfig guildConfig) {
+    private void showCommandChannels(SlashCommandInteractionEvent ctx, GuildConfig guildConfig) {
         if (guildConfig.commandChannelIds != null) {
             if (guildConfig.commandChannelIds.size() == 1) {
                 String channelId = guildConfig.commandChannelIds.iterator().next();
@@ -128,7 +127,7 @@ public class BindCommand extends Command {
         }
     }
 
-    private String formatChannel(SlashCommandEvent ctx, String channelId) {
+    private String formatChannel(SlashCommandInteractionEvent ctx, String channelId) {
         TextChannel channel = ctx.getJDA().getTextChannelById(channelId);
         return "`" + (channel != null ? Utils.formatChannel(channel) : channelId) + "`";
     }

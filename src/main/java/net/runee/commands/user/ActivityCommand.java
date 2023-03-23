@@ -1,19 +1,18 @@
 package net.runee.commands.user;
 
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.runee.errors.CommandException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
-
 import java.util.Locale;
 
 public class ActivityCommand extends Command {
     public ActivityCommand() {
-        super(new CommandData("activity", "Manage the bot users activity"));
+        super(Commands.slash("activity", "Manage the bot users activity"));
         data.addOption(OptionType.STRING, "type", "The type of the new bot users activity (playing|streaming|listening|watching|competing)", true);
         data.addOption(OptionType.STRING, "what", "Description of what the bot is doing", true);
         data.addOption(OptionType.STRING, "url", "A link to the aforementioned activity. Only valid if type = 'streaming'", false);
@@ -21,7 +20,7 @@ public class ActivityCommand extends Command {
     }
 
     @Override
-    public void run(SlashCommandEvent ctx) throws CommandException {
+    public void run(SlashCommandInteractionEvent ctx) throws CommandException {
         _public = getOptionalBoolean(ctx, "public", false);
 
         ensureOwnerPermission(ctx);

@@ -1,7 +1,7 @@
 package net.runee.model;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -9,7 +9,7 @@ import java.util.Set;
 public class GuildConfig {
     public String guildId;
     public Set<String> commandChannelIds;
-    public String autoJoinVoiceChannelId;
+    public String autoJoinAudioChannelId;
     public String followedUserId;
 
     public GuildConfig() {
@@ -22,7 +22,7 @@ public class GuildConfig {
 
     public GuildConfig(GuildConfig copy) {
         this.guildId = copy.guildId;
-        this.autoJoinVoiceChannelId = copy.autoJoinVoiceChannelId;
+        this.autoJoinAudioChannelId = copy.autoJoinAudioChannelId;
         if(copy.commandChannelIds != null) {
             this.commandChannelIds = new HashSet<>(copy.commandChannelIds);
         }

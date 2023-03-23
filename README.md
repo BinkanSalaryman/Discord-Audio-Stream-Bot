@@ -21,8 +21,16 @@
 * In the settings tab, paste your bot token and hit return
 * In the home tab, click the big on/off button to log in to the bot user with the token
 * In the maintenance tab, invite/add the bot to a guild/server, if necessary
-#### Part 3 - Test run
-* Use `/join` to bring the bot user up in a voice channel (if "slash commands" don't show up, you may need to re-invite with the new authorization grant link including the `applications.commands` scope!)
+#### Part 3 - Command Introduction
+* Now you can enter commands - either by sending a direct message to the bot user, or with @mention as prefix from within a channel of a guild/server shared by you and the bot user
+* Enter the command "help" for a complete list of available commands
+* Enter "help <command_name_in_question>" for details about a specific command and especially its arguments.
+* If an argument contains a whitespace character (` `), you need to surround it with quotation marks (`"`). You need to escape quotation marks and backslashes (`\`) with a backslash. For example, `@bot activity playing "\"Favourite\" Music\\"` would set the bot user's activity to `"Favourite" Music\`. **Note: I will omit command arguments from now on**
+* Use the "prefix" command to avoid the possibly lengthy @mention prefix
+* Use "bind" to restrict command usage to one or more channels
+* Use "autojoin" or "follow-voice" to automate *join*ing voice channels
+#### Part 4 - Test run
+* Issue the command "join" to bring the bot user up in a voice channel
 * In the settings tab of the bot program, unmute the bot
 * Choose & select a recording device (default one being your microphone, most likely)
 * Now it should be sending audio from the selected recording device to discord. Enjoy!

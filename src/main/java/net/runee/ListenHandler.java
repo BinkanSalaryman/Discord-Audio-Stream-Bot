@@ -149,11 +149,11 @@ public class ListenHandler implements AudioReceiveHandler, Closeable {
         if (playbackDevice >= 0) {
             Bass.BASS_SetDevice(playbackDevice);
             Bass.BASS_Free();
-            Utils.checkBassError();
         }
         memoryQueue = null;
         //buffer = null;
         playbackStream = null;
         playbackDevice = -1;
+        Utils.checkBassError();
     }
 }

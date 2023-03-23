@@ -6,6 +6,9 @@ import jouvieje.bass.defines.BASS_ERROR;
 import jouvieje.bass.structures.BASS_DEVICEINFO;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.runee.errors.BassException;
 import net.runee.misc.gui.SpecBuilder;
 import org.slf4j.Logger;
@@ -306,35 +309,36 @@ public final class Utils {
         }
     }
 
-    public static List<VoiceChannel> findSuitableVoiceChannel(Guild guild, Member author) {
+    public static List<AudioChannel> findSuitableAudioChannel(Guild guild, Member author) {
         for (int step = 0; true; step++) {
             switch (step) {
                 case 0: {
                     // try to connect to author's channel
-                    VoiceChannel channel = author.getVoiceState().getChannel();
-                    if (channel == null) {
-                        continue;
+                    AudioChannel channel = author.getVoiceState().getChannel();
+                    if (channel != null) {
+                        return Collections.singletonList(channel);
                     }
-                    return Collections.singletonList(channel);
                 }
                 case 1: {
                     // try to connect to AFK channel
-                    VoiceChannel channel = guild.getAfkChannel();
-                    if (channel == null) {
-                        continue;
+                    AudioChannel channel = guild.getAfkChannel();
+                    if (channel != null) {
+                        return Collections.singletonList(channel);
                     }
-                    return Collections.singletonList(channel);
                 }
                 case 2:
                     // try to connect to any channel
-                    return guild.getVoiceChannels();
+                    List<AudioChannel> channels = new ArrayList<>();
+                    channels.addAll(guild.getVoiceChannels());
+                    channels.addAll(guild.getStageChannels());
+                    return channels;
                 default:
                     return Collections.emptyList();
             }
         }
     }
 
-    public static List<VoiceChannel> findVoiceChannel(Guild guild, String search) {
+    public static List<AudioChannel> findAudioChannel(Guild guild, String search) {
         for (int step = 0; true; step++) {
             switch (step) {
                 case 0: {
@@ -342,21 +346,32 @@ public final class Utils {
                     if (channelId == null) {
                         continue;
                     }
-                    VoiceChannel channel = guild.getVoiceChannelById(channelId);
-                    if (channel == null) {
-                        continue;
+                    AudioChannel channel;
+                    channel = guild.getVoiceChannelById(channelId);
+                    if (channel != null) {
+                        return Collections.singletonList(channel);
                     }
-                    return Collections.singletonList(channel);
+                    channel = guild.getStageChannelById(channelId);
+                    if (channel != null) {
+                        return Collections.singletonList(channel);
+                    }
                 }
                 case 1: {
-                    List<VoiceChannel> channels = guild.getVoiceChannelsByName(search, true);
-                    if (channels.size() != 1) {
-                        continue;
+                    List<? extends AudioChannel> channels;
+                    channels = guild.getVoiceChannelsByName(search, true);
+                    if (channels.size() == 1) {
+                        return Collections.singletonList(channels.get(0));
                     }
-                    return Collections.singletonList(channels.get(0));
+                    channels = guild.getStageChannelsByName(search, true);
+                    if (channels.size() == 1) {
+                        return Collections.singletonList(channels.get(0));
+                    }
                 }
                 case 2:
-                    return guild.getVoiceChannelsByName(search, false);
+                    List<AudioChannel> channels = new ArrayList<>();
+                    channels.addAll(guild.getVoiceChannelsByName(search, false));
+                    channels.addAll(guild.getStageChannelsByName(search, false));
+                    return channels;
                 default:
                     return Collections.emptyList();
             }

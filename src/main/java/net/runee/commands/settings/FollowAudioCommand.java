@@ -3,27 +3,26 @@ package net.runee.commands.settings;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.runee.errors.CommandException;
 import net.runee.misc.Utils;
 import net.runee.misc.discord.Command;
 import net.runee.model.Config;
 import net.runee.model.GuildConfig;
-
 import java.util.Locale;
 
-public class FollowVoiceCommand extends Command {
-    public FollowVoiceCommand() {
-        super(new CommandData("follow-voice", "Mark a user to be followed in along voice channels"));
+public class FollowAudioCommand extends Command {
+    public FollowAudioCommand() {
+        super(Commands.slash("follow-audio", "Mark a user to be followed in along voice channels"));
         data.addOption(OptionType.STRING, "op", "Operation to perform (set|clear|show)", true);
         data.addOption(OptionType.USER, "user", "User in question. Only valid if op = 'set'", false);
         _public = true;
     }
 
     @Override
-    public void run(SlashCommandEvent ctx) throws CommandException {
+    public void run(SlashCommandInteractionEvent ctx) throws CommandException {
         Guild guild = ensureAdminOrOwnerPermission(ctx);
 
         String op = ensureOptionPresent(ctx, "op").getAsString().toLowerCase(Locale.ROOT);
@@ -47,7 +46,7 @@ public class FollowVoiceCommand extends Command {
         }
     }
 
-    private void setFollowVoice(SlashCommandEvent ctx, Guild guild, Member target) {
+    private void setFollowVoice(SlashCommandInteractionEvent ctx, Guild guild, Member target) {
         final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
         guildConfig.followedUserId = target != null ? target.getId() : null;
@@ -59,7 +58,7 @@ public class FollowVoiceCommand extends Command {
         }
     }
 
-    private void showFollowVoice(SlashCommandEvent ctx, Guild guild) {
+    private void showFollowVoice(SlashCommandInteractionEvent ctx, Guild guild) {
         final Config config = getConfig();
         GuildConfig guildConfig = config.getGuildConfig(guild);
         if (guildConfig.followedUserId != null) {
