@@ -16,21 +16,18 @@
 * Copy the bot token
 * Enable the "SERVER MEMBERS INTENT" (required to check if a user issuing a command has sufficient permissions)
 #### Part 2 - Bot Program
-* Check that a Java Runtime Environment (JRE) is installed and is added to the PATH system environment variable
-* Run the bot program using **run win64.bat** or **run win32.bat** (depending on your PC's architecture; in case one doesn't work, please try the other one!). **Note: This step is only valid for Windows.** *If you intend to run it on mac or linux, I would appreciate your help in making launch scripts or putting explanations in this document!*
+* Check that a Java Runtime Environment, version 1.8 / 8 (JRE v1.8 / v8) is installed and is added to the PATH system environment variable
+* Run the bot program using **run win64.bat** or **run win32.bat** (depending on your PC's architecture; in case one doesn't work, please try the other one!). **Note: This step is only valid for Windows.** *If you intend to run it on mac or linux, I would appreciate your help in making launch scripts or submitting explanations for this document!*
 * In the settings tab, paste your bot token and hit return
 * In the home tab, click the big on/off button to log in to the bot user with the token
 * In the maintenance tab, invite/add the bot to a guild/server, if necessary
 #### Part 3 - Command Introduction
-* Now you can enter commands - either by sending a direct message to the bot user, or with @mention as prefix from within a channel of a guild/server shared by you and the bot user
-* Enter the command "help" for a complete list of available commands
-* Enter "help <command_name_in_question>" for details about a specific command and especially its arguments.
-* If an argument contains a whitespace character (` `), you need to surround it with quotation marks (`"`). You need to escape quotation marks and backslashes (`\`) with a backslash. For example, `@bot activity playing "\"Favourite\" Music\\"` would set the bot user's activity to `"Favourite" Music\`. **Note: I will omit command arguments from now on**
-* Use the "prefix" command to avoid the possibly lengthy @mention prefix
-* Use "bind" to restrict command usage to one or more channels
-* Use "autojoin" or "follow-voice" to automate *join*ing voice channels
+* Now you can enter commands - either by sending a direct message in a private channel to the bot user or from within a channel of a guild/server shared by you and the bot user. Start by typing a slash ("/") to get a list of available commands for all applicable bots
+* As an example, type "/about" to get a link to this repo ("/about public:True" to also show that to other users)
+* Use "/bind" to restrict command usage to one or more channels in a guild
+* Use "/autojoin" or "/follow-audio" to automate *join*ing audio channels (being a voice or stage channel)
 #### Part 4 - Test run
-* Issue the command "join" to bring the bot user up in a voice channel
+* Issue the command "/join" to bring the bot user up in a voice channel
 * In the settings tab of the bot program, unmute the bot
 * Choose & select a recording device (default one being your microphone, most likely)
 * Now it should be sending audio from the selected recording device to discord. Enjoy!
@@ -56,7 +53,7 @@
 
 
 ## Downloads
->[Latest build (2021-07-03)](https://drive.google.com/file/d/0B6898q95NTM3eGxoSVljMlM3ekk/view?usp=sharing&resourcekey=0-WRMuD2_H8996-7EDNC_9sQ) (yyyy-MM-dd)
+>[Releases](https://github.com/BinkanSalaryman/Discord-Audio-Stream-Bot/releases)
 
 #### Tools
 * >[Virtual Cable](https://www.vb-audio.com/Cable/index.htm) (A virtual audio device working as virtual audio cable - After installation, restart bot program and set the recording device in settings tab to "CABLE Output (VB-Audio Virtual Cable)". Don't forget to stream audio into the device **CABLE Input** or else you'll hear nothing)
