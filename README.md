@@ -10,18 +10,18 @@
 
 
 ## Getting started
-#### Part 1 - Bot User
+#### Part 1 - Bot user
 * Create a discord developer application [here](https://discordapp.com/developers/applications)
 * In the bot tab, add a bot user
 * Copy the bot token
 * Enable the "SERVER MEMBERS INTENT" (required to check if a user issuing a command has sufficient permissions)
-#### Part 2 - Bot Program
+#### Part 2 - Bot program
 * Check that a Java Runtime Environment, version 1.8 / 8 (JRE v1.8 / v8) is installed and is added to the PATH system environment variable
 * Run the bot program using **run win64.bat** or **run win32.bat** (depending on your PC's architecture; in case one doesn't work, please try the other one!). **Note: This step is only valid for Windows.** *If you intend to run it on mac or linux, I would appreciate your help in making launch scripts or submitting explanations for this document!*
 * In the settings tab, paste your bot token and hit return
 * In the home tab, click the big on/off button to log in to the bot user with the token
 * In the maintenance tab, invite/add the bot to a guild/server, if necessary
-#### Part 3 - Command Introduction
+#### Part 3 - Command introduction
 * Now you can enter commands - either by sending a direct message in a private channel to the bot user or from within a channel of a guild/server shared by you and the bot user. Start by typing a slash ("/") to get a list of available commands for all applicable bots
 * As an example, type "/about" to get a link to this repo ("/about public:True" to also show that to other users)
 * Use "/bind" to restrict command usage to one or more channels in a guild
