@@ -40,14 +40,14 @@
 * Install homebrew if you do not already have it, then:
   * `brew install gradle`
   * `gradle build`
+  * `cd build/distributions`
+  * `tar -xvf Discord-Audio-Stream-Bot-1.0-SNAPSHOT.tar`
 
 #### Usage
 
 * Follow the build steps above, then:
-  * `cd build/distributions`
-  * `tar -xvf Discord-Audio-Stream-Bot-1.0-SNAPSHOT.tar`
   * `cd Discord-Audio-Stream-Bot-1.0-SNAPSHOT`
-  * `DISCORD_AUDIO_STREAM_BOT_OPTS='-Djava.library.path="/usr/lib:../../../natives/mac/"' ./bin/Discord-Audio-Stream-Bot`
+  * `DISCORD_AUDIO_STREAM_BOT_OPTS='-Djava.library.path="/usr/lib:../../../natives/mac/" --add-exports="java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"' ./bin/Discord-Audio-Stream-Bot`
 
 * >[Loopback](https://rogueamoeba.com/loopback/) is a very good virtual audio cable application for macOS
 
