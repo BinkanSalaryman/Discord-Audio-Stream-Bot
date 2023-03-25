@@ -1,0 +1,18 @@
+rootProject.name = 'Discord-Audio-Stream-Bot'
+
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'org.kordamp.gradle:enforcer-gradle-plugin:0.13.0'
+    }
+}
+apply plugin: 'org.kordamp.gradle.enforcer'
+
+// enforce dependencies are java 8 compatible
+enforce {
+    rule(enforcer.rules.EnforceBytecodeVersion) { r ->
+        r.maxJdkVersion = '1.8'
+    }
+}

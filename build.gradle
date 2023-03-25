@@ -1,48 +1,90 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // integrate dependencies into output jar
+}
+
+wrapper {
+    gradleVersion = '8.0.2'
 }
 
 group 'net.runee'
-version '1.0-SNAPSHOT'
+version '1.0-SNAPSHOT' // I prefer date based versioning here, leave it at default
 
-sourceCompatibility = JavaVersion.VERSION_1_8
 mainClassName = 'net.runee.gui.MainFrame'
+sourceCompatibility = JavaVersion.VERSION_1_8 // Project should be java 8 compatible
+targetCompatibility = JavaVersion.VERSION_1_8 // Project should be java 8 compatible
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'net.dv8tion:JDA:5.0.0-beta.6'
-//    implementation 'com.sedmelluq:lavaplayer:1.3.42'
-    implementation 'com.jgoodies:jgoodies-forms:1.9.0'
-    implementation 'com.jgoodies:jgoodies-common:1.8.1'
-    implementation 'com.jgoodies:jgoodies-looks:2.7.0'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-//    implementation 'org.slf4j:slf4j-simple:1.7.30'
-    implementation 'ch.qos.logback:logback-classic:1.4.6'
+    implementation 'net.dv8tion:JDA:5.0.0-beta.6' // discord api
+//    implementation 'com.sedmelluq:lavaplayer:1.3.42' // audio player library for discord
+    implementation 'com.jgoodies:jgoodies-forms:1.9.0' // ui framework
+    implementation 'com.jgoodies:jgoodies-common:1.8.1' // ui framework
+    implementation 'com.jgoodies:jgoodies-looks:2.7.0' // ui framework
+    implementation 'com.google.code.gson:gson:2.10.1' // json
+//    implementation 'org.apache.commons:commons-lang3:3.12.0' // general utility
+//    implementation 'org.slf4j:slf4j-simple:1.7.30' // logging
+    implementation 'ch.qos.logback:logback-classic:1.3.6' // logging | 1.3.x uses java 8, 1.4.x uses java 11
     implementation 'org.realityforge.javax.annotation:javax.annotation:1.0.1'
-    implementation files('libs/NativeBass.jar')
+    implementation files('libs/NativeBass.jar') // low-level audio
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << '-Xlint:unchecked'
-    options.deprecation = true
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // allow special characters in source files
+    options.compilerArgs += [
+            '-Xlint:unchecked', // show details if not properly using generics
+            '-Xlint:deprecation' // show details if using deprecated features
+    ]
+}
+
+// remove version details from output jar
+shadowJar {
+    archiveBaseName.set('Discord Audio Stream Bot')
+    archiveClassifier.set('')
+    archiveVersion.set('')
 }
 
 run {
-    jvmArgs = [
-        '-Djava.library.path=natives/win64/',
-        '--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED'
-    ]
+    // make bass library happy about its natives
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        if (Os.isArch("x86") || Os.isArch("i386") || Os.isArch("i486") || Os.isArch("i586") || Os.isArch("i686")) {
+            jvmArgs += '-Djava.library.path=natives/win32/'
+        } else if (Os.isArch("x86_64") || Os.isArch("amd64")) {
+            jvmArgs += '-Djava.library.path=natives/win64/'
+        } else {
+            throw new GradleException('Unrecognized architecture: ' + System.getProperty("os.arch"))
+        }
+    } else {
+        throw new GradleException('Unrecognized operating system: ' + System.getProperty("os.name"))
+    }
+    // make java 9's module system happy about jgoodies library
+    if (Integer.valueOf(JavaVersion.current().getMajorVersion()) >= 9) {
+        jvmArgs += '--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED'
+    }
 }
+
+// same as for the normal run configuration...
 runShadow {
-    jvmArgs = [
-        '-Djava.library.path=natives/win64/',
-        '--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED'
-    ]
+    // make bass library happy about its natives
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        if (Os.isArch("x86") || Os.isArch("i386") || Os.isArch("i486") || Os.isArch("i586") || Os.isArch("i686")) {
+            jvmArgs += '-Djava.library.path=natives/win32/'
+        } else if (Os.isArch("x86_64") || Os.isArch("amd64")) {
+            jvmArgs += '-Djava.library.path=natives/win64/'
+        } else {
+            throw new GradleException('Unrecognized architecture: ' + System.getProperty("os.arch"))
+        }
+    } else {
+        throw new GradleException('Unrecognized operating system: ' + System.getProperty("os.name"))
+    }
+    // make java 9's module system happy about jgoodies library
+    if (Integer.valueOf(JavaVersion.current().getMajorVersion()) >= 9) {
+        jvmArgs += '--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED'
+    }
 }
