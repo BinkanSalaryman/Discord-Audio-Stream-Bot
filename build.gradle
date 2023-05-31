@@ -14,8 +14,8 @@ group 'net.runee'
 version '1.0-SNAPSHOT' // I prefer date based versioning here, leave it at default
 
 mainClassName = 'net.runee.gui.MainFrame'
-sourceCompatibility = JavaVersion.VERSION_1_8 // Project should be java 8 compatible
-targetCompatibility = JavaVersion.VERSION_1_8 // Project should be java 8 compatible
+sourceCompatibility = JavaVersion.VERSION_1_8 // project should be java 8 compatible
+targetCompatibility = JavaVersion.VERSION_1_8 // project should be java 8 compatible
 
 repositories {
     mavenCentral()

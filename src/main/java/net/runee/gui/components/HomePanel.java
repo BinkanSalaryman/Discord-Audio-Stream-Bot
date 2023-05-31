@@ -2,6 +2,7 @@ package net.runee.gui.components;
 
 import com.jgoodies.forms.builder.FormBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
@@ -17,9 +18,17 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HomePanel extends JPanel implements EventListener {
     private static final Logger logger = LoggerFactory.getLogger(HomePanel.class);
+
+    private Long gatewayPing;
+    private Map<Guild, Long> audioPings = new HashMap<>();
+
     private JLabel loginLabel;
     private JButton loginButton;
     private JLabel pingLabel;
@@ -99,7 +108,7 @@ public class HomePanel extends JPanel implements EventListener {
         final DiscordAudioStreamBot bot = DiscordAudioStreamBot.getInstance();
         switch (bot.getJDA() != null ? bot.getJDA().getStatus() : JDA.Status.SHUTDOWN) {
             case CONNECTED:
-                if(toggle__login__logoff != 1) {
+                if (toggle__login__logoff != 1) {
                     bot.logoff();
                 }
                 break;
@@ -110,7 +119,7 @@ public class HomePanel extends JPanel implements EventListener {
                     loginButton.setEnabled(true);
                     return;
                 }
-                if(toggle__login__logoff != 2) {
+                if (toggle__login__logoff != 2) {
                     try {
                         bot.login();
                         bot.getJDA().addEventListener(this);
@@ -153,7 +162,8 @@ public class HomePanel extends JPanel implements EventListener {
             case CONNECTED:
                 break;
             default:
-                pingLabel.setText("Ping: N/A");
+                updatePingLabel();
+                break;
         }
         if (!initial) {
             mainFrame.updateLoginStatus(status);
@@ -173,7 +183,34 @@ public class HomePanel extends JPanel implements EventListener {
         return "CloseCode " + code.getCode() + ": " + code.getMeaning();
     }
 
-    public void onPing(long ping) {
-        pingLabel.setText("Ping: " + ping + " ms");
+    public void onGatewayPing(Long ping) {
+        gatewayPing = ping;
+        updatePingLabel();
+    }
+
+    public void onAudioPing(Guild guild, Long ping) {
+        if(ping != null) {
+            audioPings.put(guild, ping);
+        } else {
+            audioPings.remove(guild);
+        }
+        updatePingLabel();
+    }
+
+    private void updatePingLabel() {
+        List<String> lines = new ArrayList<>();
+        lines.add("Gateway: " + formatPing(gatewayPing));
+        for (Map.Entry<Guild, Long> entry : audioPings.entrySet()) {
+            lines.add("Audio (" + entry.getKey().getName() + "): " + formatPing(entry.getValue()));
+        }
+        pingLabel.setText("<html>" + String.join("<br>", lines) + "</html > ");
+    }
+
+    private static String formatPing(Long ping) {
+        if (ping != null) {
+            return ping + " ms";
+        } else {
+            return "N/A";
+        }
     }
 }

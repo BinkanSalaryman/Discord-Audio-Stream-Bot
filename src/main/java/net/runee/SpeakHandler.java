@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.runee.errors.BassException;
 import net.runee.misc.MemoryQueue;
 import net.runee.misc.Utils;
+import net.runee.model.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,11 +116,15 @@ public class SpeakHandler implements AudioSendHandler, Closeable {
     }
 
     private static boolean RECORDPROC(HRECORD handle, ByteBuffer buffer, int length, Pointer user) {
+        Config cfg = DiscordAudioStreamBot.getConfig();
         List<SpeakHandler> handlers = getActiveHandlers(handle);
         byte[] sampleBuffer = new byte[2];
         int numSamplesToWrite = length / sampleBuffer.length;
         for (int s = 0; s < numSamplesToWrite; s++) {
             short sample = buffer.getShort();
+            if(cfg.getSpeakThresholdEnabled() && Math.abs((double)sample) <= cfg.getSpeakThreshold() * Short.MAX_VALUE) {
+                sample = 0;
+            }
             sampleBuffer[0] = (byte) ((sample >> 8) & 0xff);
             sampleBuffer[1] = (byte) (sample & 0xff);
             for (SpeakHandler handler : handlers) {

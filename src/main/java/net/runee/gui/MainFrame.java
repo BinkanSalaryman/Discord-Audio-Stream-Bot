@@ -81,11 +81,11 @@ public class MainFrame extends JFrame implements Runnable {
 
     private JTabbedPane tabs;
     private int idxHome;
-    private HomePanel tabHome;
+    public HomePanel tabHome;
     private int idxMaintain;
-    private MaintenancePanel tabMaintain;
+    public MaintenancePanel tabMaintain;
     private int idxSettings;
-    private SettingsPanel tabSettings;
+    public SettingsPanel tabSettings;
 
     private MainFrame() {
         updateTitle();
@@ -176,9 +176,5 @@ public class MainFrame extends JFrame implements Runnable {
             words[i] = word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
         }
         return String.join(" ", words);
-    }
-
-    public void onPing(long ping) {
-        tabHome.onPing(ping);
     }
 }

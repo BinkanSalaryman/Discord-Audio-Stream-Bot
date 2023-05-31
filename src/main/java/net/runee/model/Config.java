@@ -14,6 +14,9 @@ public class Config {
     public Boolean listenEnabled;
     public String playbackDevice;
     public List<GuildConfig> guildConfigs;
+    public Boolean speakThresholdEnabled;
+
+    public Double speakThreshold;
 
     public Config() {
 
@@ -44,6 +47,14 @@ public class Config {
 
     public boolean getListenEnabled() {
         return listenEnabled != null ? listenEnabled : false;
+    }
+
+    public boolean getSpeakThresholdEnabled() {
+        return speakThresholdEnabled != null ? speakThresholdEnabled : false;
+    }
+
+    public double getSpeakThreshold() {
+        return speakThreshold != null ? speakThreshold : 0.5d;
     }
 
     public GuildConfig getGuildConfig(Guild guild) {

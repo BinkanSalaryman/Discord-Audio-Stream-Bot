@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.audio.hooks.ConnectionListener;
 import net.dv8tion.jda.api.audio.hooks.ConnectionStatus;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.events.GatewayPingEvent;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -259,7 +260,12 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
 
     @Override
     public void onShutdown(@Nonnull ShutdownEvent e) {
+        EventQueue.invokeLater(() -> MainFrame.getInstance().tabHome.onGatewayPing(null));
+    }
 
+    @Override
+    public void onGatewayPing(@NotNull GatewayPingEvent e) {
+        EventQueue.invokeLater(() -> MainFrame.getInstance().tabHome.onGatewayPing(e.getNewPing()));
     }
 
     @Override
@@ -327,7 +333,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
         audioManager.setConnectionListener(new ConnectionListener() {
             @Override
             public void onPing(long ping) {
-                EventQueue.invokeLater(() -> MainFrame.getInstance().onPing(ping));
+                EventQueue.invokeLater(() -> MainFrame.getInstance().tabHome.onAudioPing(channel.getGuild(), ping));
             }
 
             @Override
@@ -346,6 +352,7 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                             if (sendingHandler instanceof SpeakHandler) {
                                 ((SpeakHandler) sendingHandler).setPlaying(false);
                             }
+                            EventQueue.invokeLater(() -> MainFrame.getInstance().tabHome.onAudioPing(channel.getGuild(), null));
                             break;
                         }
                     }

@@ -28,6 +28,8 @@ public class SettingsPanel extends JPanel {
     private JButton listenEnabled;
     private JList<RecordingDeviceItem> recordingDevices;
     private JList<PlaybackDeviceItem> playbackDevices;
+    private JCheckBox speakThresholdEnabled;
+    private JSlider speakThreshold;
 
     public SettingsPanel() {
         initComponents();
@@ -93,6 +95,22 @@ public class SettingsPanel extends JPanel {
                 saveConfig();
             }
         });
+        speakThresholdEnabled = new JCheckBox();
+        speakThresholdEnabled.addActionListener(e -> {
+            final Config cfg = DiscordAudioStreamBot.getConfig();
+            cfg.speakThresholdEnabled = !cfg.getSpeakThresholdEnabled();
+            updateSpeakThresholdEnabled();
+            saveConfig();
+        });
+        speakThreshold = new JSlider();
+        speakThreshold.setMinimum(1);
+        speakThreshold.setMaximum(99);
+        speakThreshold.addChangeListener(e -> {
+            if (!speakThreshold.getValueIsAdjusting()) {
+                final Config cfg = DiscordAudioStreamBot.getConfig();
+                cfg.speakThreshold = speakThreshold.getValue() * (1d/100d);
+            }
+        });
     }
 
     private void loadConfig() {
@@ -144,6 +162,9 @@ public class SettingsPanel extends JPanel {
                 }
             }
         }
+        speakThresholdEnabled.setSelected(cfg.getSpeakThresholdEnabled());
+        speakThreshold.setValue((int) (cfg.getSpeakThreshold() * 100));
+        updateSpeakThresholdEnabled();
     }
 
     private void saveConfig() {
@@ -174,6 +195,7 @@ public class SettingsPanel extends JPanel {
                         .gapUnrelated().add("c:p")
                         .add("c:p")
                         .add("t:p")
+                        .add("c:p", 4)
                         .build()
                 )
                 .columnGroups(new int[]{1, 5}, new int[]{2, 6})
@@ -193,6 +215,10 @@ public class SettingsPanel extends JPanel {
                 /**/.add(recordingDevices).xy(3, row)
                 /**/.add("Output device").xy(5, row)
                 /**/.add(playbackDevices).xy(7, row)
+                .add("Voice activity").xy(1, row += 2)
+                /**/.add(speakThresholdEnabled).xy(3, row)
+                .add("Speak threshold").xy(1, row += 2)
+                /**/.add(speakThreshold).xy(3, row)
                 .build();
     }
 
@@ -226,10 +252,15 @@ public class SettingsPanel extends JPanel {
     private void updateListenEnabled() {
         boolean enabled = DiscordAudioStreamBot.getConfig().getListenEnabled();
         ImageIcon icon = Utils.getIcon("icomoon/32px/017-headphones.png", 24, true);
-        if(!enabled) {
+        if (!enabled) {
             icon = new ImageIcon(Utils.overlayImage((BufferedImage) icon.getImage(), Utils.getIcon("runee/32px/strike-through.png", 24, true).getImage()));
         }
         listenEnabled.setIcon(icon);
         playbackDevices.setEnabled(enabled);
+    }
+
+    private void updateSpeakThresholdEnabled() {
+        boolean enabled = DiscordAudioStreamBot.getConfig().getSpeakThresholdEnabled();
+        speakThreshold.setEnabled(enabled);
     }
 }
