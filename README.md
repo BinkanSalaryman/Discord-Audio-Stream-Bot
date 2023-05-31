@@ -16,7 +16,7 @@
 * Copy the bot token
 * Enable the "SERVER MEMBERS INTENT" (required to check if a user issuing a command has sufficient permissions)
 #### Part 2 - Bot program
-* Check that a Java Runtime Environment, version 1.8 / 8 (JRE v1.8 / v8) or higher with an architecture matching your computer is installed and that the folder containing java.exe & javaw.exe is added to the PATH system environment variable - otherwise it crash in the next step!
+* Check that a Java Runtime Environment, version 1.8 / 8 (JRE v1.8 / v8) or higher with an architecture matching your computer is installed and that the folder containing java.exe & javaw.exe is added to the PATH system environment variable - otherwise it will crash in the next step!
 * Run the bot program using "**run win.bat**"<br>**Note: This step is only valid for Windows.** *If you intend to run it on mac or linux, I would appreciate your help in making launch scripts or submitting explanations for this document!*
 * In the settings tab, paste your bot token and hit return
 * In the home tab, click the big on/off button to log in to the bot user with the token
