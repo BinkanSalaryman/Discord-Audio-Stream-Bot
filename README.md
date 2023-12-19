@@ -33,7 +33,7 @@
 * Now it should be sending audio from the selected recording device to discord. Enjoy!
 
 
-### macOS (credits to spkane)
+### macOS (credits to spkane, *may be outdated*)
 
 #### Building
 
@@ -51,6 +51,22 @@
 
 * >[Loopback](https://rogueamoeba.com/loopback/) is a very good virtual audio cable application for macOS
 
+
+### Linux (CentOS 7) (credits to Johnny Primus, *may be outdated*)
+
+#### Building
+* Install java and dependencies
+* `sudo yum install java-11-openjdk-devel.x86_64 java-11-openjdk-headless.x86_64 git-all zip unzip bzip2 gzip`
+* Install sdkman (https://sdkman.io/)
+* `curl -s "https://get.sdkman.io" | bash`
+* Install gradle 8.5 (https://gradle.org/install/)
+* `sdk install gradle 8.5`
+* `build`
+* `gradle build`
+
+#### Usage
+* Follow the build steps above, then:
+  * `gradle run`
 
 ## Downloads
 >[Releases](https://github.com/BinkanSalaryman/Discord-Audio-Stream-Bot/releases)
