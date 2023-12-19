@@ -7,7 +7,7 @@ plugins {
 }
 
 wrapper {
-    gradleVersion = '8.0.2'
+    gradleVersion = '8.5'
 }
 
 group 'net.runee'
@@ -57,6 +57,14 @@ run {
             jvmArgs += '-Djava.library.path=natives/win32/'
         } else if (Os.isArch("x86_64") || Os.isArch("amd64")) {
             jvmArgs += '-Djava.library.path=natives/win64/'
+	} else {
+            throw new GradleException('Unrecognized architecture: ' + System.getProperty("os.arch"))
+        }
+    } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        if (Os.isArch("x86") || Os.isArch("i386") || Os.isArch("i486") || Os.isArch("i586") || Os.isArch("i686")) {
+            jvmArgs += '-Djava.library.path=natives/linux32/'
+        } else if (Os.isArch("x86_64") || Os.isArch("amd64")) {
+            jvmArgs += '-Djava.library.path=natives/linux64/'
         } else {
             throw new GradleException('Unrecognized architecture: ' + System.getProperty("os.arch"))
         }
@@ -64,7 +72,7 @@ run {
         throw new GradleException('Unrecognized operating system: ' + System.getProperty("os.name"))
     }
     // make java 9's module system happy about jgoodies library
-    if (Integer.valueOf(JavaVersion.current().getMajorVersion()) >= 9) {
+    if (Integer.valueOf(JavaVersion.current().getMajorVersion()) >= 9 && Os.isFamily(Os.FAMILY_WINDOWS)) {
         jvmArgs += '--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED'
     }
 }
@@ -77,6 +85,14 @@ runShadow {
             jvmArgs += '-Djava.library.path=natives/win32/'
         } else if (Os.isArch("x86_64") || Os.isArch("amd64")) {
             jvmArgs += '-Djava.library.path=natives/win64/'
+	} else {
+            throw new GradleException('Unrecognized architecture: ' + System.getProperty("os.arch"))
+        }
+    } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        if (Os.isArch("x86") || Os.isArch("i386") || Os.isArch("i486") || Os.isArch("i586") || Os.isArch("i686")) {
+            jvmArgs += '-Djava.library.path=natives/linux32/'
+        } else if (Os.isArch("x86_64") || Os.isArch("amd64")) {
+            jvmArgs += '-Djava.library.path=natives/linux64/'
         } else {
             throw new GradleException('Unrecognized architecture: ' + System.getProperty("os.arch"))
         }
@@ -84,7 +100,7 @@ runShadow {
         throw new GradleException('Unrecognized operating system: ' + System.getProperty("os.name"))
     }
     // make java 9's module system happy about jgoodies library
-    if (Integer.valueOf(JavaVersion.current().getMajorVersion()) >= 9) {
+    if (Integer.valueOf(JavaVersion.current().getMajorVersion()) >= 9 && Os.isFamily(Os.FAMILY_WINDOWS)) {
         jvmArgs += '--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED'
     }
 }
