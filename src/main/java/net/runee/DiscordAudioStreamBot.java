@@ -360,11 +360,6 @@ public class DiscordAudioStreamBot extends ListenerAdapter {
                     logger.error("Failed to pause/unpause speak handler for guild " + audioManager.getGuild().getName(), ex);
                 }
             }
-
-            @Override
-            public void onUserSpeaking(@Nonnull User user, boolean speaking) {
-
-            }
         });
         audioManager.openAudioConnection(channel);
     }
