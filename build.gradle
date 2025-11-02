@@ -17,8 +17,8 @@ version = '1.0-SNAPSHOT' // I prefer date based versioning here, leave it at def
 application {
     mainClass = 'net.runee.gui.MainFrame'
 }
-sourceCompatibility = JavaVersion.VERSION_1_8 // project should be java 8 compatible
-targetCompatibility = JavaVersion.VERSION_1_8 // project should be java 8 compatible
+sourceCompatibility = JavaVersion.VERSION_17 // jda 6 bundles java 17 bytecode
+targetCompatibility = JavaVersion.VERSION_17 // align runtime expectations
 
 repositories {
     mavenCentral()
