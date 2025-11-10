@@ -1,5 +1,6 @@
 package net.runee.misc;
 
+import org.junit.jupiter.api.Test;
 import java.util.Scanner;
 
 public class CommandArgTest {
@@ -16,5 +17,10 @@ public class CommandArgTest {
                 System.out.println(" * arg " + i + ": '" + cmdArgs[i] + "'");
             }
         }
+    }
+
+    @Test
+    void __dummy__ () {
+        // make gradle happy when doesn't find any test (use above main function to test manually)
     }
 }
